@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studycast AI — Transforme qualquer material em conhecimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0A0F2C;
+    --bg-secondary:#121A4A;
+    --bg-card:#151E56;
+    --bg-card-hover:#1A2464;
+    --purple:#7B5CFA;
+    --purple-light:#B69FFF;
+    --purple-glow:rgba(123,92,250,0.35);
+    --white:#FFFFFF;
+    --text-muted:#A8AFDB;
+    --text-dim:#6D74A8;
+    --border:rgba(182,159,255,0.14);
+    --radius:16px;
+    --green:#8FE3A8;
+    --gold:#FFD27D;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-base);
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    line-height:1.5;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  .container{max-width:1160px;margin:0 auto;padding:0 32px;}
+
+  body::before{
+    content:"";
+    position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+    width:1200px;height:1200px;
+    background:radial-gradient(circle, var(--purple-glow) 0%, transparent 65%);
+    z-index:0;pointer-events:none;opacity:0.6;
+  }
+  body::after{
+    content:"";
+    position:fixed;bottom:-30%;right:-10%;
+    width:900px;height:900px;
+    background:radial-gradient(circle, rgba(123,92,250,0.18) 0%, transparent 70%);
+    z-index:0;pointer-events:none;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{position:sticky;top:0;z-index:100;background:rgba(10,15,44,0.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+  .nav-inner{max-width:1160px;margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;}
+  .logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg, var(--purple), #4B3FD6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--purple-glow);}
+  .logo-mark svg{width:16px;height:16px;}
+  .nav-links{display:flex;gap:36px;font-size:14.5px;color:var(--text-muted);}
+  .nav-links a{transition:color .2s ease;}
+  .nav-links a:hover{color:var(--white);}
+  .nav-cta{display:flex;align-items:center;gap:14px;}
+
+  .lang-switch{display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .lang-switch button{padding:6px 12px;border-radius:999px;color:var(--text-muted);font-weight:600;letter-spacing:.03em;}
+  .lang-switch button.active{background:var(--purple);color:#fff;}
+
+  .btn{font-family:'Inter',sans-serif;font-weight:600;font-size:14px;padding:10px 20px;border-radius:999px;border:none;cursor:pointer;transition:all .2s ease;display:inline-flex;align-items:center;gap:8px;}
+  .btn-ghost{background:transparent;color:var(--text-muted);}
+  .btn-ghost:hover{color:var(--white);}
+  .btn-primary{background:linear-gradient(135deg, var(--purple), #6247E0);color:var(--white);box-shadow:0 4px 20px var(--purple-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 26px var(--purple-glow);}
+  .btn-large{padding:15px 28px;font-size:15.5px;}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--white);}
+  .btn-outline:hover{border-color:var(--purple-light);background:rgba(123,92,250,0.08);}
+  .btn-block{width:100%;justify-content:center;}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;z-index:1;padding:100px 0 80px;text-align:center;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--purple-light);background:rgba(123,92,250,0.1);border:1px solid var(--border);padding:7px 16px;border-radius:999px;margin-bottom:28px;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--purple-light);box-shadow:0 0 8px var(--purple-light);}
+
+  .hero h1{font-size:clamp(38px, 6.4vw, 72px);line-height:1.05;max-width:880px;margin:0 auto 24px;}
+  .hero h1 .accent{background:linear-gradient(120deg, var(--purple-light), var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p.sub{font-size:18.5px;color:var(--text-muted);max-width:580px;margin:0 auto 40px;}
+  .hero-cta{display:flex;justify-content:center;gap:14px;margin-bottom:56px;flex-wrap:wrap;}
+
+  .hero-badges{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:90px;color:var(--text-dim);font-size:13px;}
+  .hero-badges span{display:flex;align-items:center;gap:7px;}
+  .hero-badges svg{color:var(--green);}
+
+  /* ---------- SIGNATURE VISUAL ---------- */
+  .transform-visual{position:relative;max-width:920px;margin:0 auto;height:340px;}
+  .transform-visual svg{width:100%;height:100%;overflow:visible;}
+  .node-line{stroke:url(#lineGrad);stroke-width:1.5;fill:none;stroke-dasharray:4 5;opacity:0.5;animation:dash 22s linear infinite;}
+  @keyframes dash{to{stroke-dashoffset:-200;}}
+  .node{filter:drop-shadow(0 0 18px rgba(123,92,250,0.35));}
+  .node-card{fill:var(--bg-card);stroke:var(--border);stroke-width:1;}
+  .pulse{animation:pulse 3s ease-in-out infinite;transform-origin:center;}
+  .pulse.d1{animation-delay:0s;} .pulse.d2{animation-delay:.5s;} .pulse.d3{animation-delay:1s;} .pulse.d4{animation-delay:1.5s;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+  .node-label{font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;fill:var(--white);}
+  .node-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;fill:var(--text-dim);}
+  @media (prefers-reduced-motion: reduce){.node-line, .pulse{animation:none !important;}}
+
+  /* ---------- SECTION SHARED ---------- */
+  section{position:relative;z-index:1;padding:100px 0;}
+  .section-head{text-align:center;max-width:620px;margin:0 auto 64px;}
+  .section-head .eyebrow{margin-bottom:20px;}
+  .section-head h2{font-size:clamp(28px,4vw,42px);margin-bottom:16px;}
+  .section-head p{color:var(--text-muted);font-size:16.5px;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .step-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;position:relative;}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--purple-light);margin-bottom:18px;display:block;}
+  .step-card h3{font-size:19px;margin-bottom:10px;}
+  .step-card p{color:var(--text-muted);font-size:14.5px;}
+
+  /* ---------- FEATURES GRID ---------- */
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:30px 26px;transition:all .25s ease;}
+  .feature-card:hover{background:var(--bg-card-hover);border-color:var(--purple-light);transform:translateY(-3px);}
+  .feature-card.highlight{border-color:rgba(255,210,125,0.4);background:linear-gradient(160deg, rgba(123,92,250,0.14), var(--bg-card));}
+  .feature-icon{width:44px;height:44px;border-radius:12px;background:rgba(123,92,250,0.14);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--purple-light);}
+  .feature-card.highlight .feature-icon{background:rgba(255,210,125,0.16);color:var(--gold);}
+  .feature-card h3{font-size:17.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .feature-card p{color:var(--text-muted);font-size:14px;}
+  .pill-new{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);background:rgba(255,210,125,0.14);border:1px solid rgba(255,210,125,0.3);padding:3px 8px;border-radius:20px;}
+
+  .export-row{margin-top:22px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:26px 30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+  .export-row .label{font-size:14.5px;color:var(--text-muted);}
+  .export-row .label strong{color:var(--white);display:block;font-family:'Space Grotesk',sans-serif;font-size:17px;margin-bottom:4px;}
+  .export-formats{display:flex;gap:10px;flex-wrap:wrap;}
+  .format-pill{font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:8px 14px;border-radius:999px;border:1px solid var(--border);color:var(--text-muted);}
+
+  /* ---------- OBJECTIVES ---------- */
+  .objectives-wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+  .objective-pill{background:var(--bg-card);border:1px solid var(--border);padding:14px 22px;border-radius:999px;font-size:14.5px;display:flex;align-items:center;gap:10px;transition:all .2s ease;}
+  .objective-pill:hover{border-color:var(--purple-light);background:var(--bg-card-hover);}
+  .objective-pill .ico{color:var(--purple-light);font-size:16px;}
+
+  /* ---------- DASHBOARD PREVIEW ---------- */
+  .dash-wrap{background:linear-gradient(180deg, var(--bg-secondary), var(--bg-base));border:1px solid var(--border);border-radius:24px;padding:8px;}
+  .dash-inner{background:var(--bg-base);border:1px solid var(--border);border-radius:18px;padding:36px;}
+  .dash-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:14px;}
+  .dash-topbar h4{font-size:15px;color:var(--text-muted);font-weight:500;}
+  .dash-dots{display:flex;gap:6px;}
+  .dash-dots span{width:9px;height:9px;border-radius:50%;background:var(--bg-card-hover);}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 22px;}
+  .stat-card .stat-label{font-size:13px;color:var(--text-muted);margin-bottom:12px;}
+  .stat-card .stat-value{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;color:var(--white);}
+  .stat-card .stat-delta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green);margin-top:8px;}
+
+  /* ---------- ABOUT / QUEM SOMOS ---------- */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+  .about-text p{color:var(--text-muted);font-size:16px;margin-bottom:18px;line-height:1.8;}
+  .about-text strong{color:var(--white);}
+  .pillars{display:flex;flex-direction:column;gap:16px;}
+  .pillar{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;display:flex;gap:16px;align-items:flex-start;}
+  .pillar .feature-icon{margin-bottom:0;flex-shrink:0;}
+  .pillar h4{font-size:15.5px;margin-bottom:6px;}
+  .pillar p{color:var(--text-muted);font-size:13.5px;}
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch;}
+  .price-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:34px 28px;display:flex;flex-direction:column;position:relative;}
+  .price-card.popular{border-color:var(--purple-light);background:linear-gradient(160deg, rgba(123,92,250,0.16), var(--bg-card));transform:translateY(-8px);}
+  .price-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg, var(--purple), #6247E0);font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 16px;border-radius:999px;box-shadow:0 4px 16px var(--purple-glow);white-space:nowrap;}
+  .price-name{font-size:19px;margin-bottom:6px;}
+  .price-desc{color:var(--text-muted);font-size:13.5px;margin-bottom:22px;min-height:36px;}
+  .price-value{display:flex;align-items:baseline;gap:6px;margin-bottom:26px;}
+  .price-value .amount{font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:700;}
+  .price-value .period{color:var(--text-dim);font-size:13.5px;}
+  .price-features{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;flex:1;}
+  .price-features li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text-muted);}
+  .price-features svg{color:var(--green);flex-shrink:0;margin-top:2px;}
+  .price-features li.muted{color:var(--text-dim);}
+  .price-features li.muted svg{color:var(--text-dim);}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--border);padding:56px 0 36px;position:relative;z-index:1;}
+  .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+  .footer-col h5{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--white);margin-bottom:16px;}
+  .footer-col a{display:block;color:var(--text-muted);font-size:14px;margin-bottom:11px;transition:color .2s ease;}
+  .footer-col a:hover{color:var(--purple-light);}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--border);color:var(--text-dim);font-size:13px;flex-wrap:wrap;gap:12px;}
+
+  /* ---------- PLAN COMPARISON TABLE ---------- */
+  .compare-wrap{margin-top:56px;}
+  .compare-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);}
+  table.compare-table{width:100%;border-collapse:collapse;min-width:620px;font-size:14px;}
+  .compare-table th, .compare-table td{padding:16px 20px;text-align:center;border-bottom:1px solid var(--border);}
+  .compare-table thead th{background:var(--bg-secondary);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;position:sticky;top:0;}
+  .compare-table thead th.compare-feature-col{text-align:left;}
+  .compare-table thead th.compare-popular-col{color:var(--purple-light);}
+  .compare-table tbody th{text-align:left;font-weight:500;color:var(--text-muted);font-size:13.5px;white-space:nowrap;}
+  .compare-table tbody tr:last-child td, .compare-table tbody tr:last-child th{border-bottom:none;}
+  .compare-table tbody tr:hover{background:rgba(123,92,250,0.04);}
+  .compare-table td.compare-popular-col{background:rgba(123,92,250,0.06);}
+  .compare-check{color:var(--green);}
+  .compare-dash{color:var(--text-dim);}
+  .compare-value{color:var(--white);font-size:13.5px;}
+
+  /* ---------- FEEDBACK ---------- */
+  .feedback-card{max-width:560px;margin:0 auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:40px;}
+  .feedback-stars{display:flex;justify-content:center;gap:8px;margin-bottom:26px;}
+  .star-btn{background:none;border:none;cursor:pointer;color:var(--text-dim);padding:2px;transition:transform .15s ease, color .15s ease;}
+  .star-btn:hover{transform:scale(1.12);}
+  .star-btn.filled{color:var(--gold);}
+  .feedback-field{margin-bottom:16px;}
+  .feedback-field label{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:8px;}
+  .feedback-field input, .feedback-field textarea{
+    width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;
+  }
+  .feedback-field input:focus, .feedback-field textarea:focus{outline:none;border-color:var(--purple-light);}
+  .feedback-field input::placeholder, .feedback-field textarea::placeholder{color:var(--text-dim);}
+  .feedback-status{margin-top:16px;text-align:center;font-size:13.5px;min-height:18px;}
+  .feedback-status.success{color:var(--green);}
+  .feedback-status.error{color:#ff9b9b;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .nav-links{display:none;}
+    .steps{grid-template-columns:1fr;}
+    .features-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .transform-visual{height:auto;}
+    .about-grid{grid-template-columns:1fr;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .price-card.popular{transform:none;}
+  }
+  @media (max-width:600px){
+    .container{padding:0 20px;}
+    .features-grid{grid-template-columns:1fr;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .footer-grid{grid-template-columns:1fr;}
+    .export-row{flex-direction:column;align-items:flex-start;}
+    .hero{padding:70px 0 50px;}
+    .hero-badges{gap:16px;}
+    .compare-table th, .compare-table td{padding:12px 14px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-4 4-6 8-6s6 2 8 6c-2 4-4 6-8 6s-6-2-8-6z" stroke="white" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
+      </span>
+      Studycast AI
+    </div>
+    <div class="nav-links">
+      <a href="#recursos" data-i18n="nav_features">Recursos</a>
+      <a href="#sobre" data-i18n="nav_about">Quem somos</a>
+      <a href="#precos" data-i18n="nav_pricing">Preços</a>
+      <a href="#contato" data-i18n="nav_contact">Contato</a>
+    </div>
+    <div class="nav-cta">
+      <div class="lang-switch">
+        <button id="langPtBtn" onclick="setLang('pt')">PT</button>
+        <button id="langEnBtn" onclick="setLang('en')">EN</button>
+      </div>
+      <a href="login.html" class="btn btn-ghost" data-i18n="nav_login">Entrar</a>
+      <a href="login.html" class="btn btn-primary" data-i18n="nav_cta">Começar grátis</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow"><span class="dot"></span> <span data-i18n="hero_eyebrow">movido a IA · 100% em português e inglês</span></span>
+    <h1 data-i18n="hero_title">Um material. <span class="accent" data-i18n-wrap="accent">Todos os jeitos</span> de estudar.</h1>
+    <p class="sub" data-i18n="hero_sub">Envie qualquer conteúdo e o Studycast AI transforma em resumos, flashcards, mapas mentais e explicações completas — no seu ritmo, para o seu objetivo.</p>
+    <div class="hero-cta">
+      <a href="login.html" class="btn btn-primary btn-large" data-i18n="hero_cta_primary">Enviar meu primeiro material</a>
+      <a href="#recente" class="btn btn-outline btn-large" data-i18n="hero_cta_secondary">Ver como funciona</a>
+    </div>
+
+    <div class="hero-badges">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="badge_free">Plano gratuito para sempre</span></span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="badge_nocard">Sem cartão de crédito</span></span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="badge_chat">Chat com IA 24/7</span></span>
+    </div>
+
+    <!-- SIGNATURE VISUAL -->
+    <div class="transform-visual">
+      <svg viewBox="0 0 920 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#7B5CFA"/>
+            <stop offset="100%" stop-color="#B69FFF"/>
+          </linearGradient>
+        </defs>
+        <path class="node-line" d="M 460 170 C 380 120 300 90 190 78"/>
+        <path class="node-line" d="M 460 170 C 400 140 350 165 190 170"/>
+        <path class="node-line" d="M 460 170 C 400 200 350 230 190 262"/>
+        <path class="node-line" d="M 460 170 C 560 130 650 100 740 88"/>
+        <path class="node-line" d="M 460 170 C 560 200 650 230 740 252"/>
+
+        <g class="node">
+          <rect x="410" y="130" width="100" height="80" rx="14" class="node-card"/>
+          <line x1="428" y1="152" x2="490" y2="152" stroke="#B69FFF" stroke-width="2"/>
+          <line x1="428" y1="164" x2="480" y2="164" stroke="#6D74A8" stroke-width="2"/>
+          <line x1="428" y1="176" x2="486" y2="176" stroke="#6D74A8" stroke-width="2"/>
+          <line x1="428" y1="188" x2="466" y2="188" stroke="#6D74A8" stroke-width="2"/>
+          <text x="460" y="226" text-anchor="middle" class="node-label" data-i18n="node_material">seu material</text>
+        </g>
+
+        <g class="node pulse d1">
+          <rect x="110" y="46" width="150" height="64" rx="12" class="node-card"/>
+          <text x="184" y="72" text-anchor="middle" class="node-label" data-i18n="node_summary">Resumo</text>
+          <text x="184" y="90" text-anchor="middle" class="node-sub" data-i18n="node_summary_sub">pontos-chave</text>
+        </g>
+
+        <g class="node pulse d2">
+          <rect x="110" y="140" width="150" height="64" rx="12" class="node-card"/>
+          <text x="184" y="166" text-anchor="middle" class="node-label" data-i18n="node_flash">Flashcards</text>
+          <text x="184" y="184" text-anchor="middle" class="node-sub" data-i18n="node_flash_sub">revisão ativa</text>
+        </g>
+
+        <g class="node pulse d3">
+          <rect x="110" y="230" width="150" height="64" rx="12" class="node-card"/>
+          <text x="184" y="256" text-anchor="middle" class="node-label" data-i18n="node_mindmap">Mapa mental</text>
+          <text x="184" y="274" text-anchor="middle" class="node-sub" data-i18n="node_mindmap_sub">conexões</text>
+        </g>
+
+        <g class="node pulse d4">
+          <rect x="660" y="56" width="150" height="64" rx="12" class="node-card"/>
+          <text x="735" y="82" text-anchor="middle" class="node-label" data-i18n="node_explain">Explicação completa</text>
+          <text x="735" y="100" text-anchor="middle" class="node-sub" data-i18n="node_explain_sub">entenda o máximo</text>
+        </g>
+
+        <g class="node pulse d2">
+          <rect x="660" y="220" width="150" height="64" rx="12" class="node-card"/>
+          <text x="735" y="246" text-anchor="middle" class="node-label" data-i18n="node_chat">Chat com IA</text>
+          <text x="735" y="264" text-anchor="middle" class="node-sub" data-i18n="node_chat_sub">tire dúvidas 24/7</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section id="recente">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="how_eyebrow">como funciona</span></span>
+      <h2 data-i18n="how_title">Do material bruto ao conteúdo pronto para estudar</h2>
+      <p data-i18n="how_sub">Três passos simples entre o que você tem e o que você precisa aprender.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <span class="step-num mono">01</span>
+        <h3 data-i18n="step1_title">Envie seu material</h3>
+        <p data-i18n="step1_desc">PDF, slides, anotações ou texto colado — o Studycast AI lê e entende o conteúdo por você.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num mono">02</span>
+        <h3 data-i18n="step2_title">Escolha seu objetivo</h3>
+        <p data-i18n="step2_desc">Prova escolar, concurso, residência médica, entrevista — a IA ajusta o foco e o nível de profundidade.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num mono">03</span>
+        <h3 data-i18n="step3_title">Estude do seu jeito</h3>
+        <p data-i18n="step3_desc">Resumo, flashcards, mapa mental, explicação completa ou chat direto com a IA — tudo gerado a partir do mesmo material.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="recursos">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="features_eyebrow">recursos</span></span>
+      <h2 data-i18n="features_title">Formas de aprender o mesmo conteúdo</h2>
+      <p data-i18n="features_sub">Cada pessoa estuda de um jeito. O Studycast AI se adapta ao seu.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card highlight">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3 data-i18n="feat_explain_title">Explicação completa <span class="pill-new">planos pagos</span></h3>
+        <p data-i18n="feat_explain_desc">A IA explica o máximo possível sobre o conteúdo enviado: conceitos centrais, pontos que confundem e conexões com outros temas — em linguagem clara. Disponível a partir do plano Estudante.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3 data-i18n="feat_summary_title">Resumos</h3>
+        <p data-i18n="feat_summary_desc">Os pontos essenciais do seu material, organizados e prontos para revisar rápido antes da prova.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="7" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3 data-i18n="feat_flash_title">Flashcards</h3>
+        <p data-i18n="feat_flash_desc">Cartões de pergunta e resposta gerados automaticamente, para fixar o conteúdo por repetição.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2.2" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="17" r="2.2" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="17" r="2.2" stroke="currentColor" stroke-width="1.6"/><path d="M12 8.2V13M12 13 7 15M12 13l5 2" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3 data-i18n="feat_mindmap_title">Mapas mentais</h3>
+        <p data-i18n="feat_mindmap_desc">As conexões entre os conceitos, visualizadas — ótimo para quem entende melhor vendo o todo.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 data-i18n="feat_chat_title">Chat com IA 24/7</h3>
+        <p data-i18n="feat_chat_desc">Tire dúvidas a qualquer hora sobre o seu material e receba explicações no contexto do que você está estudando.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <h3 data-i18n="feat_own_title">Seu próprio material</h3>
+        <p data-i18n="feat_own_desc">Envie anotações, textos ou arquivos próprios, ou deixe sua opinião para ajustar o conteúdo gerado.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h3l2-6 4 12 3-9 2 3h4" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3 data-i18n="feat_audio_title">Áudio <span class="pill-new" style="color:var(--purple-light);background:rgba(123,92,250,.14);border-color:var(--border);">todos os planos</span></h3>
+        <p data-i18n="feat_audio_desc">Ouça a explicação completa em voz alta, com voz natural. 15 minutos grátis por mês, até 5h no Estudante e 10h no Premium.</p>
+      </div>
+    </div>
+
+    <div class="export-row">
+      <div class="label">
+        <strong data-i18n="export_title">Exporte quando quiser</strong>
+        <span data-i18n="export_sub">Leve seu conteúdo para onde for estudar.</span>
+      </div>
+      <div class="export-formats">
+        <span class="format-pill">PDF</span>
+        <span class="format-pill">Word</span>
+        <span class="format-pill">Excel</span>
+        <span class="format-pill">Google Docs</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="objetivos">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="obj_eyebrow">feito sob medida</span></span>
+      <h2 data-i18n="obj_title">O que você quer estudar?</h2>
+      <p data-i18n="obj_sub">A IA ajusta o conteúdo gerado de acordo com o objetivo que você escolher.</p>
+    </div>
+    <div class="objectives-wrap">
+      <div class="objective-pill"><span class="ico">🎓</span> <span data-i18n="obj_school">Prova escolar</span></div>
+      <div class="objective-pill"><span class="ico">📘</span> <span data-i18n="obj_personal">Estudo pessoal</span></div>
+      <div class="objective-pill"><span class="ico">🏛️</span> <span data-i18n="obj_exam">Concurso público</span></div>
+      <div class="objective-pill"><span class="ico">🩺</span> <span data-i18n="obj_medical">Residência médica</span></div>
+      <div class="objective-pill"><span class="ico">💼</span> <span data-i18n="obj_job">Entrevista de emprego</span></div>
+      <div class="objective-pill"><span class="ico">🎤</span> <span data-i18n="obj_presentation">Apresentação</span></div>
+      <div class="objective-pill"><span class="ico">✦</span> <span data-i18n="obj_other">Outro objetivo</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="progresso">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="progress_eyebrow">seu progresso</span></span>
+      <h2 data-i18n="progress_title">Acompanhe sua evolução em um painel só</h2>
+      <p data-i18n="progress_sub">Veja quanto material você já processou e quantas horas dedicou aos estudos.</p>
+    </div>
+
+    <div class="dash-wrap">
+      <div class="dash-inner">
+        <div class="dash-topbar">
+          <h4 data-i18n="progress_panel_label">Painel · Studycast AI</h4>
+          <div class="dash-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label" data-i18n="stat_docs">Documentos enviados</div>
+            <div class="stat-value">128</div>
+            <div class="stat-delta">↑ 12 <span data-i18n="stat_week">esta semana</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" data-i18n="stat_processed">Materiais processados</div>
+            <div class="stat-value">112</div>
+            <div class="stat-delta">↑ 9 <span data-i18n="stat_week2">esta semana</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" data-i18n="stat_content">Conteúdos gerados</div>
+            <div class="stat-value">431</div>
+            <div class="stat-delta">↑ 38 <span data-i18n="stat_week3">esta semana</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" data-i18n="stat_hours">Horas de estudo</div>
+            <div class="stat-value">76h</div>
+            <div class="stat-delta">↑ 6h <span data-i18n="stat_week4">esta semana</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sobre">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="about_eyebrow">quem somos</span></span>
+      <h2 data-i18n="about_title">Estudar não devia ser tão difícil de organizar</h2>
+      <p data-i18n="about_sub">Nosso propósito é simples: transformar qualquer material em uma forma de aprender que realmente funciona para você.</p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-text">
+        <p data-i18n="about_p1">O <strong>Studycast AI</strong> nasceu de um problema comum: cada pessoa aprende de um jeito diferente, mas quase todo material de estudo vem só em um formato. Criamos uma ferramenta que pega o que você já tem — PDFs, slides, anotações — e transforma no formato que realmente ajuda <em>você</em> a entender.</p>
+        <p data-i18n="about_p2">Acreditamos em tecnologia a serviço do aprendizado real, não em atalhos vazios. Por isso priorizamos explicações completas e claras, feedback imediato via chat, e planos acessíveis para quem estuda todos os dias — de estudantes de escola a quem se prepara para concursos e residência médica.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <h4 data-i18n="pillar1_title">Acessível para todo mundo</h4>
+            <p data-i18n="pillar1_desc">Um plano gratuito de verdade e planos pagos com preço justo, sem pegadinha.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div>
+            <h4 data-i18n="pillar2_title">Explicação em profundidade</h4>
+            <p data-i18n="pillar2_desc">Não paramos no resumo — a IA explica o máximo possível sobre o tema que você está estudando.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4V5z" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <h4 data-i18n="pillar3_title">Suporte que nunca dorme</h4>
+            <p data-i18n="pillar3_desc">Chat com IA disponível 24 horas por dia, 7 dias por semana, em português e inglês.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="precos">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="pricing_eyebrow">preços</span></span>
+      <h2 data-i18n="pricing_title">Comece de graça, evolua quando precisar</h2>
+      <p data-i18n="pricing_sub">Planos justos para quem estuda todo dia e para quem só precisa de um empurrão antes da prova.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name" data-i18n="plan_free_name">Gratuito</div>
+        <div class="price-desc" data-i18n="plan_free_desc">Para experimentar e estudar no seu ritmo.</div>
+        <div class="price-value"><span class="amount">R$0</span><span class="period" data-i18n="plan_forever">para sempre</span></div>
+        <ul class="price-features">
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_free_f1">3 materiais por mês</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_free_f2">Resumos, flashcards e mapas mentais</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_free_f4">Chat com IA (10 mensagens/dia)</span></li>
+          <li class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg><span data-i18n="plan_free_f3">Sem explicação completa</span></li>
+          <li class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg><span data-i18n="plan_free_f5">Exportação em PDF/Word/Excel</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_free_f6">Áudio (15 minutos por mês)</span></li>
+        </ul>
+        <a href="login.html" class="btn btn-outline btn-block" data-i18n="plan_free_cta">Começar grátis</a>
+      </div>
+
+      <div class="price-card popular">
+        <span class="price-badge" data-i18n="plan_popular_badge">mais escolhido</span>
+        <div class="price-name" data-i18n="plan_plus_name">Estudante</div>
+        <div class="price-desc" data-i18n="plan_plus_desc">Para quem estuda todos os dias, sem limites.</div>
+        <div class="price-value"><span class="amount">R$9,90</span><span class="period" data-i18n="plan_month">/mês</span></div>
+        <ul class="price-features">
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f1">Materiais ilimitados</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f2">Resumos, flashcards e mapas mentais</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f3">Explicação completa ilimitada</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f4">Chat com IA 24/7 sem limite diário</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f5">Exportação em PDF e Word</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_plus_f6">Áudio (até 5 horas por mês)</span></li>
+        </ul>
+        <a href="login.html" class="btn btn-primary btn-block" data-i18n="plan_plus_cta">Assinar Estudante</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-name" data-i18n="plan_premium_name">Premium</div>
+        <div class="price-desc" data-i18n="plan_premium_desc">Para concursos, residência e uso intenso.</div>
+        <div class="price-value"><span class="amount">R$19,90</span><span class="period" data-i18n="plan_month2">/mês</span></div>
+        <ul class="price-features">
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f1">Tudo do plano Estudante</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f6">Áudio (até 10 horas por mês)</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f2">Exportação em todos os formatos</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f3">Processamento prioritário</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f4">Suporte prioritário</span></li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="plan_premium_f5">Histórico de estudos ilimitado</span></li>
+        </ul>
+        <a href="login.html" class="btn btn-outline btn-block" data-i18n="plan_premium_cta">Assinar Premium</a>
+      </div>
+    </div>
+
+    <div class="compare-wrap">
+      <div class="section-head" style="margin-bottom:32px;">
+        <h2 style="font-size:clamp(22px,3vw,28px);" data-i18n="compare_title">Compare todos os recursos</h2>
+        <p data-i18n="compare_sub">Veja em detalhe o que cada plano inclui, lado a lado.</p>
+      </div>
+      <div class="compare-scroll">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="compare-feature-col" data-i18n="compare_col_feature">Recurso</th>
+              <th data-i18n="plan_free_name">Gratuito</th>
+              <th class="compare-popular-col" data-i18n="plan_plus_name">Estudante</th>
+              <th data-i18n="plan_premium_name">Premium</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th data-i18n="compare_row_materials">Materiais por mês</th>
+              <td class="compare-value">3</td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_unlimited">Ilimitado</td>
+              <td class="compare-value" data-i18n="compare_unlimited">Ilimitado</td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_summary">Resumos</th>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td class="compare-popular-col"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_flash">Flashcards</th>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td class="compare-popular-col"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_mindmap">Mapas mentais</th>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td class="compare-popular-col"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_explain">Explicação completa</th>
+              <td><svg class="compare-dash" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_unlimited2">Ilimitada</td>
+              <td class="compare-value" data-i18n="compare_unlimited3">Ilimitada</td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_chat">Chat com IA</th>
+              <td class="compare-value" data-i18n="compare_chat_free">10 msgs/dia</td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_chat_paid">24/7 sem limite</td>
+              <td class="compare-value" data-i18n="compare_chat_paid2">24/7 sem limite</td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_audio">Áudio</th>
+              <td class="compare-value" data-i18n="compare_audio_free">15 min/mês</td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_audio_plus">5h/mês</td>
+              <td class="compare-value" data-i18n="compare_audio_premium">10h/mês</td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_export">Exportação</th>
+              <td class="compare-value" data-i18n="compare_export_free">PDF, Word, Excel</td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_export_plus">PDF, Word</td>
+              <td class="compare-value" data-i18n="compare_export_premium">Todos os formatos</td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_priority">Processamento prioritário</th>
+              <td><svg class="compare-dash" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></td>
+              <td class="compare-popular-col"><svg class="compare-dash" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></td>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_support">Suporte prioritário</th>
+              <td><svg class="compare-dash" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></td>
+              <td class="compare-popular-col"><svg class="compare-dash" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></td>
+              <td><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></td>
+            </tr>
+            <tr>
+              <th data-i18n="compare_row_history">Histórico de estudos</th>
+              <td class="compare-value" data-i18n="compare_history_free">30 dias</td>
+              <td class="compare-popular-col compare-value" data-i18n="compare_history_plus">30 dias</td>
+              <td class="compare-value" data-i18n="compare_unlimited5">Ilimitado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="feedback">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="feedback_eyebrow">sua opinião importa</span></span>
+      <h2 data-i18n="feedback_title">O que você achou do Studycast AI?</h2>
+      <p data-i18n="feedback_sub">Seu feedback nos ajuda a melhorar o site pra você e pra quem vier depois.</p>
+    </div>
+
+    <div class="feedback-card">
+      <form id="feedbackForm" onsubmit="return submitFeedback(event)">
+        <div class="feedback-stars" id="feedbackStars"></div>
+
+        <div class="feedback-field">
+          <label data-i18n="feedback_name_label">Seu nome (opcional)</label>
+          <input type="text" id="feedbackName" data-i18n-placeholder="feedback_name_ph" placeholder="Como podemos te chamar?">
+        </div>
+
+        <div class="feedback-field">
+          <label data-i18n="feedback_message_label">Sua mensagem</label>
+          <textarea id="feedbackMessage" rows="4" required data-i18n-placeholder="feedback_message_ph" placeholder="Conte o que achou, o que faltou, o que você gostou..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large btn-block" data-i18n="feedback_submit">Enviar feedback</button>
+        <div class="feedback-status" id="feedbackStatus"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="contato">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="logo" style="margin-bottom:14px;">
+          <span class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-4 4-6 8-6s6 2 8 6c-2 4-4 6-8 6s-6-2-8-6z" stroke="white" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
+          </span>
+          Studycast AI
+        </div>
+        <p style="color:var(--text-muted);font-size:14px;max-width:240px;" data-i18n="footer_tagline">Um material. Todos os jeitos de estudar.</p>
+      </div>
+      <div class="footer-col">
+        <h5 data-i18n="footer_product">Produto</h5>
+        <a href="#recursos" data-i18n="footer_link_features">Recursos</a>
+        <a href="#objetivos" data-i18n="footer_link_objectives">Objetivos</a>
+        <a href="#precos" data-i18n="footer_link_pricing">Preços</a>
+      </div>
+      <div class="footer-col">
+        <h5 data-i18n="footer_company">Empresa</h5>
+        <a href="#sobre" data-i18n="footer_link_about">Quem somos</a>
+        <a href="#recente" data-i18n="footer_link_how">Como funciona</a>
+        <a href="#contato" data-i18n="footer_link_contact">Contato</a>
+      </div>
+      <div class="footer-col">
+        <h5 data-i18n="footer_contact">Contato</h5>
+        <a href="mailto:contato@studycast.ai">contato@studycast.ai</a>
+        <a href="#">Instagram</a>
+        <a href="#">LinkedIn</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span data-i18n="footer_copy">© 2026 Studycast AI. Todos os direitos reservados.</span>
+      <span class="mono" data-i18n="footer_slogan">feito para quem estuda</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const translations = {
+    pt: {
+      nav_features:"Recursos", nav_about:"Quem somos", nav_pricing:"Preços", nav_contact:"Contato",
+      nav_login:"Entrar", nav_cta:"Começar grátis",
+      hero_eyebrow:"movido a IA · 100% em português e inglês",
+      hero_title:'Um material. <span class="accent">Todos os jeitos</span> de estudar.',
+      hero_sub:"Envie qualquer conteúdo e o Studycast AI transforma em resumos, flashcards, mapas mentais e explicações completas — no seu ritmo, para o seu objetivo.",
+      hero_cta_primary:"Enviar meu primeiro material", hero_cta_secondary:"Ver como funciona",
+      badge_free:"Plano gratuito para sempre", badge_nocard:"Sem cartão de crédito", badge_chat:"Chat com IA 24/7",
+      node_material:"seu material", node_summary:"Resumo", node_summary_sub:"pontos-chave",
+      node_flash:"Flashcards", node_flash_sub:"revisão ativa",
+      node_mindmap:"Mapa mental", node_mindmap_sub:"conexões",
+      node_explain:"Explicação completa", node_explain_sub:"entenda o máximo",
+      node_chat:"Chat com IA", node_chat_sub:"tire dúvidas 24/7",
+      how_eyebrow:"como funciona", how_title:"Do material bruto ao conteúdo pronto para estudar",
+      how_sub:"Três passos simples entre o que você tem e o que você precisa aprender.",
+      step1_title:"Envie seu material", step1_desc:"PDF, slides, anotações ou texto colado — o Studycast AI lê e entende o conteúdo por você.",
+      step2_title:"Escolha seu objetivo", step2_desc:"Prova escolar, concurso, residência médica, entrevista — a IA ajusta o foco e o nível de profundidade.",
+      step3_title:"Estude do seu jeito", step3_desc:"Resumo, flashcards, mapa mental, explicação completa ou chat direto com a IA — tudo gerado a partir do mesmo material.",
+      features_eyebrow:"recursos", features_title:"Formas de aprender o mesmo conteúdo",
+      features_sub:"Cada pessoa estuda de um jeito. O Studycast AI se adapta ao seu.",
+      feat_explain_title:'Explicação completa <span class="pill-new">planos pagos</span>',
+      feat_explain_desc:"A IA explica o máximo possível sobre o conteúdo enviado: conceitos centrais, pontos que confundem e conexões com outros temas — em linguagem clara. Disponível a partir do plano Estudante.",
+      feat_summary_title:"Resumos", feat_summary_desc:"Os pontos essenciais do seu material, organizados e prontos para revisar rápido antes da prova.",
+      feat_flash_title:"Flashcards", feat_flash_desc:"Cartões de pergunta e resposta gerados automaticamente, para fixar o conteúdo por repetição.",
+      feat_mindmap_title:"Mapas mentais", feat_mindmap_desc:"As conexões entre os conceitos, visualizadas — ótimo para quem entende melhor vendo o todo.",
+      feat_chat_title:"Chat com IA 24/7", feat_chat_desc:"Tire dúvidas a qualquer hora sobre o seu material e receba explicações no contexto do que você está estudando.",
+      feat_own_title:"Seu próprio material", feat_own_desc:"Envie anotações, textos ou arquivos próprios, ou deixe sua opinião para ajustar o conteúdo gerado.",
+      feat_audio_title:'Áudio <span class="pill-new" style="color:var(--purple-light);background:rgba(123,92,250,.14);border-color:var(--border);">todos os planos</span>',
+      feat_audio_desc:"Ouça a explicação completa em voz alta, com voz natural. 15 minutos grátis por mês, até 5h no Estudante e 10h no Premium.",
+      export_title:"Exporte quando quiser", export_sub:"Leve seu conteúdo para onde for estudar.",
+      obj_eyebrow:"feito sob medida", obj_title:"O que você quer estudar?", obj_sub:"A IA ajusta o conteúdo gerado de acordo com o objetivo que você escolher.",
+      obj_school:"Prova escolar", obj_personal:"Estudo pessoal", obj_exam:"Concurso público", obj_medical:"Residência médica",
+      obj_job:"Entrevista de emprego", obj_presentation:"Apresentação", obj_other:"Outro objetivo",
+      progress_eyebrow:"seu progresso", progress_title:"Acompanhe sua evolução em um painel só",
+      progress_sub:"Veja quanto material você já processou e quantas horas dedicou aos estudos.",
+      progress_panel_label:"Painel · Studycast AI",
+      stat_docs:"Documentos enviados", stat_processed:"Materiais processados", stat_content:"Conteúdos gerados", stat_hours:"Horas de estudo",
+      stat_week:"esta semana", stat_week2:"esta semana", stat_week3:"esta semana", stat_week4:"esta semana",
+      about_eyebrow:"quem somos", about_title:"Estudar não devia ser tão difícil de organizar",
+      about_sub:"Nosso propósito é simples: transformar qualquer material em uma forma de aprender que realmente funciona para você.",
+      about_p1:'O <strong>Studycast AI</strong> nasceu de um problema comum: cada pessoa aprende de um jeito diferente, mas quase todo material de estudo vem só em um formato. Criamos uma ferramenta que pega o que você já tem — PDFs, slides, anotações — e transforma no formato que realmente ajuda <em>você</em> a entender.',
+      about_p2:"Acreditamos em tecnologia a serviço do aprendizado real, não em atalhos vazios. Por isso priorizamos explicações completas e claras, feedback imediato via chat, e planos acessíveis para quem estuda todos os dias — de estudantes de escola a quem se prepara para concursos e residência médica.",
+      pillar1_title:"Acessível para todo mundo", pillar1_desc:"Um plano gratuito de verdade e planos pagos com preço justo, sem pegadinha.",
+      pillar2_title:"Explicação em profundidade", pillar2_desc:"Não paramos no resumo — a IA explica o máximo possível sobre o tema que você está estudando.",
+      pillar3_title:"Suporte que nunca dorme", pillar3_desc:"Chat com IA disponível 24 horas por dia, 7 dias por semana, em português e inglês.",
+      pricing_eyebrow:"preços", pricing_title:"Comece de graça, evolua quando precisar",
+      pricing_sub:"Planos justos para quem estuda todo dia e para quem só precisa de um empurrão antes da prova.",
+      plan_free_name:"Gratuito", plan_free_desc:"Para experimentar e estudar no seu ritmo.", plan_forever:"para sempre",
+      plan_free_f1:"3 materiais por mês", plan_free_f2:"Resumos, flashcards e mapas mentais", plan_free_f3:"Sem explicação completa",
+      plan_free_f4:"Chat com IA (10 mensagens/dia)", plan_free_f5:"Exportação em PDF/Word/Excel", plan_free_f6:"Áudio (15 minutos por mês)", plan_free_cta:"Começar grátis",
+      plan_popular_badge:"mais escolhido", plan_plus_name:"Estudante", plan_plus_desc:"Para quem estuda todos os dias, sem limites.", plan_month:"/mês",
+      plan_plus_f1:"Materiais ilimitados", plan_plus_f2:"Resumos, flashcards e mapas mentais", plan_plus_f3:"Explicação completa ilimitada",
+      plan_plus_f4:"Chat com IA 24/7 sem limite diário", plan_plus_f5:"Exportação em PDF e Word", plan_plus_f6:"Áudio (até 5 horas por mês)", plan_plus_cta:"Assinar Estudante",
+      plan_premium_name:"Premium", plan_premium_desc:"Para concursos, residência e uso intenso.", plan_month2:"/mês",
+      plan_premium_f1:"Tudo do plano Estudante", plan_premium_f2:"Exportação em todos os formatos", plan_premium_f3:"Processamento prioritário",
+      plan_premium_f4:"Suporte prioritário", plan_premium_f5:"Histórico de estudos ilimitado", plan_premium_f6:"Áudio (até 10 horas por mês)", plan_premium_cta:"Assinar Premium",
+      compare_title:"Compare todos os recursos", compare_sub:"Veja em detalhe o que cada plano inclui, lado a lado.",
+      compare_col_feature:"Recurso", compare_unlimited:"Ilimitado", compare_unlimited2:"Ilimitada", compare_unlimited3:"Ilimitada", compare_unlimited4:"Ilimitado", compare_unlimited5:"Ilimitado",
+      compare_row_materials:"Materiais por mês", compare_row_summary:"Resumos", compare_row_flash:"Flashcards", compare_row_mindmap:"Mapas mentais",
+      compare_row_explain:"Explicação completa", compare_row_chat:"Chat com IA", compare_chat_free:"10 msgs/dia", compare_chat_paid:"24/7 sem limite", compare_chat_paid2:"24/7 sem limite",
+      compare_row_audio:"Áudio", compare_audio_free:"15 min/mês", compare_audio_plus:"5h/mês", compare_audio_premium:"10h/mês",
+      compare_row_export:"Exportação", compare_export_free:"PDF, Word, Excel", compare_export_plus:"PDF, Word", compare_export_premium:"Todos os formatos",
+      compare_row_priority:"Processamento prioritário", compare_row_support:"Suporte prioritário",
+      compare_row_history:"Histórico de estudos", compare_history_free:"30 dias", compare_history_plus:"30 dias",
+      feedback_eyebrow:"sua opinião importa", feedback_title:"O que você achou do Studycast AI?",
+      feedback_sub:"Seu feedback nos ajuda a melhorar o site pra você e pra quem vier depois.",
+      feedback_name_label:"Seu nome (opcional)", feedback_name_ph:"Como podemos te chamar?",
+      feedback_message_label:"Sua mensagem", feedback_message_ph:"Conte o que achou, o que faltou, o que você gostou...",
+      feedback_submit:"Enviar feedback", feedback_sending:"Enviando...", feedback_thanks:"Obrigado! Seu feedback foi enviado. 🎉",
+      feedback_error:"Não consegui enviar agora. Tente novamente em instantes.", feedback_empty:"Escreva uma mensagem antes de enviar.",
+      footer_tagline:"Um material. Todos os jeitos de estudar.", footer_product:"Produto",
+      footer_link_features:"Recursos", footer_link_objectives:"Objetivos", footer_link_pricing:"Preços",
+      footer_company:"Empresa", footer_link_about:"Quem somos", footer_link_how:"Como funciona", footer_link_contact:"Contato",
+      footer_contact:"Contato", footer_copy:"© 2026 Studycast AI. Todos os direitos reservados.", footer_slogan:"feito para quem estuda"
+    },
+    en: {
+      nav_features:"Features", nav_about:"About us", nav_pricing:"Pricing", nav_contact:"Contact",
+      nav_login:"Log in", nav_cta:"Start for free",
+      hero_eyebrow:"powered by AI · fully available in English and Portuguese",
+      hero_title:'One document. <span class="accent">Every way</span> to study.',
+      hero_sub:"Upload any material and Studycast AI turns it into summaries, flashcards, mind maps and full explanations — at your pace, for your goal.",
+      hero_cta_primary:"Upload my first material", hero_cta_secondary:"See how it works",
+      badge_free:"Free plan forever", badge_nocard:"No credit card required", badge_chat:"24/7 AI chat",
+      node_material:"your material", node_summary:"Summary", node_summary_sub:"key points",
+      node_flash:"Flashcards", node_flash_sub:"active recall",
+      node_mindmap:"Mind map", node_mindmap_sub:"connections",
+      node_explain:"Full explanation", node_explain_sub:"understand it all",
+      node_chat:"AI chat", node_chat_sub:"ask anytime, 24/7",
+      how_eyebrow:"how it works", how_title:"From raw material to ready-to-study content",
+      how_sub:"Three simple steps between what you have and what you need to learn.",
+      step1_title:"Upload your material", step1_desc:"PDF, slides, notes or pasted text — Studycast AI reads and understands the content for you.",
+      step2_title:"Choose your goal", step2_desc:"School exam, public exam, medical residency, job interview — the AI adjusts focus and depth.",
+      step3_title:"Study your way", step3_desc:"Summary, flashcards, mind map, full explanation or a direct chat with the AI — all generated from the same material.",
+      features_eyebrow:"features", features_title:"Ways to learn the same content",
+      features_sub:"Everyone studies differently. Studycast AI adapts to you.",
+      feat_explain_title:'Full explanation <span class="pill-new">paid plans</span>',
+      feat_explain_desc:"The AI explains as much as possible about the content you uploaded: core concepts, common points of confusion, and connections to related topics — in plain language. Available from the Student plan.",
+      feat_summary_title:"Summaries", feat_summary_desc:"The essential points of your material, organized and ready for a quick review before the exam.",
+      feat_flash_title:"Flashcards", feat_flash_desc:"Question-and-answer cards generated automatically to help you retain content through repetition.",
+      feat_mindmap_title:"Mind maps", feat_mindmap_desc:"The connections between concepts, visualized — great if you understand better by seeing the big picture.",
+      feat_chat_title:"24/7 AI chat", feat_chat_desc:"Ask questions anytime about your material and get explanations in the context of what you're studying.",
+      feat_own_title:"Your own material", feat_own_desc:"Upload your own notes, text or files, or leave feedback to fine-tune the generated content.",
+      feat_audio_title:'Audio <span class="pill-new" style="color:var(--purple-light);background:rgba(123,92,250,.14);border-color:var(--border);">all plans</span>',
+      feat_audio_desc:"Listen to the full explanation read aloud with a natural voice. 15 free minutes a month, up to 5h on Student and 10h on Premium.",
+      export_title:"Export whenever you want", export_sub:"Take your content anywhere you study.",
+      obj_eyebrow:"tailor-made", obj_title:"What do you want to study?", obj_sub:"The AI adjusts the generated content based on the goal you choose.",
+      obj_school:"School exam", obj_personal:"Personal study", obj_exam:"Public exam", obj_medical:"Medical residency",
+      obj_job:"Job interview", obj_presentation:"Presentation", obj_other:"Another goal",
+      progress_eyebrow:"your progress", progress_title:"Track your evolution in one dashboard",
+      progress_sub:"See how much material you've already processed and how many hours you've dedicated to studying.",
+      progress_panel_label:"Dashboard · Studycast AI",
+      stat_docs:"Documents uploaded", stat_processed:"Materials processed", stat_content:"Content generated", stat_hours:"Study hours",
+      stat_week:"this week", stat_week2:"this week", stat_week3:"this week", stat_week4:"this week",
+      about_eyebrow:"about us", about_title:"Studying shouldn't be this hard to organize",
+      about_sub:"Our purpose is simple: turn any material into a way of learning that actually works for you.",
+      about_p1:'<strong>Studycast AI</strong> was born from a common problem: everyone learns differently, but almost every study material comes in a single format. We built a tool that takes what you already have — PDFs, slides, notes — and turns it into the format that actually helps <em>you</em> understand.',
+      about_p2:"We believe in technology that serves real learning, not empty shortcuts. That's why we prioritize clear, complete explanations, instant feedback through chat, and affordable plans for people who study every day — from school students to those preparing for public exams and medical residency.",
+      pillar1_title:"Affordable for everyone", pillar1_desc:"A real free plan and paid plans with fair pricing, no catch.",
+      pillar2_title:"In-depth explanations", pillar2_desc:"We don't stop at the summary — the AI explains as much as possible about the topic you're studying.",
+      pillar3_title:"Support that never sleeps", pillar3_desc:"AI chat available 24 hours a day, 7 days a week, in Portuguese and English.",
+      pricing_eyebrow:"pricing", pricing_title:"Start for free, upgrade when you need to",
+      pricing_sub:"Fair plans for people who study every day, and for those who just need a push before the exam.",
+      plan_free_name:"Free", plan_free_desc:"To try it out and study at your own pace.", plan_forever:"forever",
+      plan_free_f1:"3 materials per month", plan_free_f2:"Summaries, flashcards and mind maps", plan_free_f3:"No full explanation",
+      plan_free_f4:"AI chat (10 messages/day)", plan_free_f5:"Export to PDF/Word/Excel", plan_free_f6:"Audio (15 minutes per month)", plan_free_cta:"Start for free",
+      plan_popular_badge:"most popular", plan_plus_name:"Student", plan_plus_desc:"For people who study every day, with no limits.", plan_month:"/mo",
+      plan_plus_f1:"Unlimited materials", plan_plus_f2:"Summaries, flashcards and mind maps", plan_plus_f3:"Unlimited full explanations",
+      plan_plus_f4:"24/7 AI chat, no daily limit", plan_plus_f5:"Export to PDF and Word", plan_plus_f6:"Audio (up to 5 hours per month)", plan_plus_cta:"Subscribe to Student",
+      plan_premium_name:"Premium", plan_premium_desc:"For public exams, residency and heavy use.", plan_month2:"/mo",
+      plan_premium_f1:"Everything in Student", plan_premium_f2:"Export to all formats", plan_premium_f3:"Priority processing",
+      plan_premium_f4:"Priority support", plan_premium_f5:"Unlimited study history", plan_premium_f6:"Audio (up to 10 hours per month)", plan_premium_cta:"Subscribe to Premium",
+      compare_title:"Compare all features", compare_sub:"See exactly what each plan includes, side by side.",
+      compare_col_feature:"Feature", compare_unlimited:"Unlimited", compare_unlimited2:"Unlimited", compare_unlimited3:"Unlimited", compare_unlimited4:"Unlimited", compare_unlimited5:"Unlimited",
+      compare_row_materials:"Materials per month", compare_row_summary:"Summaries", compare_row_flash:"Flashcards", compare_row_mindmap:"Mind maps",
+      compare_row_explain:"Full explanation", compare_row_chat:"AI chat", compare_chat_free:"10 msgs/day", compare_chat_paid:"24/7, no limit", compare_chat_paid2:"24/7, no limit",
+      compare_row_audio:"Audio", compare_audio_free:"15 min/mo", compare_audio_plus:"5h/mo", compare_audio_premium:"10h/mo",
+      compare_row_export:"Export", compare_export_free:"PDF, Word, Excel", compare_export_plus:"PDF, Word", compare_export_premium:"All formats",
+      compare_row_priority:"Priority processing", compare_row_support:"Priority support",
+      compare_row_history:"Study history", compare_history_free:"30 days", compare_history_plus:"30 days",
+      feedback_eyebrow:"your opinion matters", feedback_title:"What did you think of Studycast AI?",
+      feedback_sub:"Your feedback helps us improve the site for you and for everyone who comes after.",
+      feedback_name_label:"Your name (optional)", feedback_name_ph:"What should we call you?",
+      feedback_message_label:"Your message", feedback_message_ph:"Tell us what you thought, what was missing, what you liked...",
+      feedback_submit:"Send feedback", feedback_sending:"Sending...", feedback_thanks:"Thanks! Your feedback was sent. 🎉",
+      feedback_error:"Couldn't send it right now. Please try again shortly.", feedback_empty:"Write a message before sending.",
+      footer_tagline:"One document. Every way to study.", footer_product:"Product",
+      footer_link_features:"Features", footer_link_objectives:"Goals", footer_link_pricing:"Pricing",
+      footer_company:"Company", footer_link_about:"About us", footer_link_how:"How it works", footer_link_contact:"Contact",
+      footer_contact:"Contact", footer_copy:"© 2026 Studycast AI. All rights reserved.", footer_slogan:"made for people who study"
+    }
+  };
+
+  let currentLang = localStorage.getItem('scLang') || 'pt';
+
+  function setLang(lang){
+    currentLang = lang;
+    localStorage.setItem('scLang', lang);
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('langPtBtn').classList.toggle('active', lang==='pt');
+    document.getElementById('langEnBtn').classList.toggle('active', lang==='en');
+    const dict = translations[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if(dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(dict[key] !== undefined) el.placeholder = dict[key];
+    });
+  }
+
+  setLang(currentLang);
+
+  // ---------- feedback form ----------
+  let feedbackRating = 0;
+
+  function renderStars(){
+    const wrap = document.getElementById('feedbackStars');
+    wrap.innerHTML = [1,2,3,4,5].map(i => `
+      <button type="button" class="star-btn ${i<=feedbackRating?'filled':''}" onclick="setFeedbackRating(${i})" aria-label="${i} star">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="${i<=feedbackRating?'currentColor':'none'}" stroke="currentColor" stroke-width="1.6"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg>
+      </button>`).join('');
+  }
+  function setFeedbackRating(i){
+    feedbackRating = (feedbackRating === i) ? 0 : i;
+    renderStars();
+  }
+  renderStars();
+
+  async function submitFeedback(e){
+    e.preventDefault();
+    const name = document.getElementById('feedbackName').value.trim();
+    const message = document.getElementById('feedbackMessage').value.trim();
+    const statusEl = document.getElementById('feedbackStatus');
+    statusEl.className = 'feedback-status';
+
+    if(!message){
+      statusEl.textContent = translations[currentLang].feedback_empty;
+      statusEl.classList.add('error');
+      return false;
+    }
+
+    statusEl.textContent = translations[currentLang].feedback_sending;
+    try{
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, rating: feedbackRating, message, lang: currentLang })
+      });
+      if(!res.ok) throw new Error('failed');
+      statusEl.textContent = translations[currentLang].feedback_thanks;
+      statusEl.classList.add('success');
+      document.getElementById('feedbackForm').reset();
+      feedbackRating = 0;
+      renderStars();
+    } catch(err){
+      statusEl.textContent = translations[currentLang].feedback_error;
+      statusEl.classList.add('error');
+    }
+    return false;
+  }
+</script>
+
+</body>
+</html>

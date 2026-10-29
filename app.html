@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studycast AI — Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0A0F2C;
+    --bg-secondary:#121A4A;
+    --bg-card:#151E56;
+    --bg-card-hover:#1A2464;
+    --purple:#7B5CFA;
+    --purple-light:#B69FFF;
+    --purple-glow:rgba(123,92,250,0.35);
+    --white:#FFFFFF;
+    --text-muted:#A8AFDB;
+    --text-dim:#6D74A8;
+    --border:rgba(182,159,255,0.14);
+    --radius:16px;
+    --green:#8FE3A8;
+    --gold:#FFD27D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg-base);color:var(--white);font-family:'Inter',sans-serif;line-height:1.5;height:100vh;overflow:hidden;}
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-0.02em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--bg-card-hover);border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .app{display:flex;height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{width:252px;flex-shrink:0;background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 16px;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;padding:0 8px 22px;}
+  .logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, var(--purple), #4B3FD6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px var(--purple-glow);flex-shrink:0;}
+  .logo-mark svg{width:15px;height:15px;}
+
+  .lang-switch{display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:11px;margin:0 4px 16px;}
+  .lang-switch button{flex:1;padding:6px 0;border-radius:999px;color:var(--text-muted);font-weight:600;text-align:center;}
+  .lang-switch button.active{background:var(--purple);color:#fff;}
+
+  .nav-group{margin-bottom:6px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;font-size:14.5px;color:var(--text-muted);margin-bottom:2px;transition:all .15s ease;width:100%;text-align:left;}
+  .nav-item svg{width:17px;height:17px;flex-shrink:0;}
+  .nav-item:hover{color:var(--white);background:rgba(255,255,255,0.04);}
+  .nav-item.active{color:var(--white);background:var(--bg-card-hover);}
+  .nav-item.active svg{color:var(--purple-light);}
+  .nav-item .badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--purple);color:#fff;padding:2px 7px;border-radius:20px;}
+  .nav-item .badge.live{background:var(--green);color:#0A0F2C;}
+
+  .sidebar-divider{height:1px;background:var(--border);margin:16px 4px;}
+
+  .objective-select-wrap{padding:0 4px;margin-bottom:16px;}
+  .objective-select-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:8px;padding:0 8px;}
+  select.objective-select{width:100%;background:var(--bg-card);border:1px solid var(--border);color:var(--white);padding:10px 12px;border-radius:10px;font-size:13.5px;font-family:'Inter',sans-serif;appearance:none;}
+
+  .hours-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 4px 16px;}
+  .hours-card .hours-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:6px;}
+  .hours-card .hours-value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;}
+  .hours-card .hours-sub{font-size:11.5px;color:var(--green);margin-top:2px;}
+
+  .sidebar-spacer{flex:1;}
+
+  .plan-usage{padding:0 4px;margin-bottom:14px;}
+  .plan-usage .usage-label{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);margin-bottom:6px;}
+  .usage-track{height:6px;border-radius:6px;background:var(--bg-card);overflow:hidden;}
+  .usage-fill{height:100%;background:linear-gradient(90deg, var(--purple), var(--purple-light));}
+
+  .user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);}
+  .upgrade-btn{width:30px;height:30px;border-radius:8px;background:rgba(123,92,250,.16);color:var(--purple-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .upgrade-btn:hover{background:rgba(123,92,250,.3);}
+
+  .tag-lock{display:inline-flex;align-items:center;gap:4px;}
+  .tag-lock svg{width:9px;height:9px;}
+  .locked-pane{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 20px;gap:14px;}
+  .locked-icon{width:52px;height:52px;border-radius:14px;background:rgba(123,92,250,.14);display:flex;align-items:center;justify-content:center;color:var(--purple-light);}
+  .locked-pane h3{font-size:16.5px;}
+  .locked-pane p{font-size:13.5px;color:var(--text-muted);max-width:320px;}
+  .premium-pill{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--purple-light);background:rgba(123,92,250,.14);border:1px solid var(--border);padding:4px 10px;border-radius:20px;}
+
+  .upgrade-modal-wide{max-width:640px;}
+  .upgrade-plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:8px 26px 30px;}
+  .upgrade-plan-card{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:26px 22px;display:flex;flex-direction:column;}
+  .upgrade-plan-card.popular{border-color:var(--purple-light);background:linear-gradient(160deg, rgba(123,92,250,0.14), var(--bg-card));}
+  .upgrade-plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg, var(--purple), #6247E0);font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:5px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 14px var(--purple-glow);}
+  .upgrade-plan-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;margin-bottom:8px;}
+  .upgrade-plan-price{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-dim);margin-bottom:18px;}
+  .upgrade-plan-price strong{color:var(--white);font-size:24px;font-family:'Space Grotesk',sans-serif;}
+  .upgrade-plan-features{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;flex:1;}
+  .upgrade-plan-features li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text-muted);list-style:none;}
+  .upgrade-plan-features li svg{color:var(--green);flex-shrink:0;margin-top:2px;}
+  @media (max-width:560px){ .upgrade-plans-grid{grid-template-columns:1fr;} }
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-card-hover);border:1px solid var(--purple-light);border-radius:12px;padding:14px 22px;font-size:14px;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg, var(--purple-light), var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;flex-shrink:0;}
+  .user-info{overflow:hidden;}
+  .user-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-plan{font-size:11.5px;color:var(--text-dim);}
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;overflow-y:auto;position:relative;}
+  .view{display:none;padding:34px 40px 60px;max-width:1100px;}
+  .view.active{display:block;}
+  .view-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+  .view-header h1{font-size:26px;margin-bottom:6px;}
+  .view-header p{color:var(--text-muted);font-size:14.5px;}
+
+  .btn{font-weight:600;font-size:14px;padding:10px 18px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .2s ease;}
+  .btn-primary{background:linear-gradient(135deg, var(--purple), #6247E0);color:#fff;box-shadow:0 4px 16px var(--purple-glow);}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-outline{border:1px solid var(--border);color:var(--white);}
+  .btn-outline:hover{border-color:var(--purple-light);background:rgba(123,92,250,.08);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:34px;}
+  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+  .stat-icon{width:34px;height:34px;border-radius:9px;background:rgba(123,92,250,.14);display:flex;align-items:center;justify-content:center;color:var(--purple-light);margin-bottom:14px;}
+  .stat-icon svg{width:17px;height:17px;}
+  .stat-label{font-size:12.5px;color:var(--text-muted);margin-bottom:8px;}
+  .stat-value{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;}
+  .stat-delta{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--green);margin-top:6px;}
+
+  .dropzone{border:1.5px dashed var(--border);border-radius:16px;padding:36px;text-align:center;margin-bottom:34px;transition:all .2s ease;cursor:pointer;}
+  .dropzone:hover{border-color:var(--purple-light);background:rgba(123,92,250,.04);}
+  .dropzone-icon{width:46px;height:46px;border-radius:12px;background:rgba(123,92,250,.14);display:flex;align-items:center;justify-content:center;color:var(--purple-light);margin:0 auto 16px;}
+  .dropzone h3{font-size:16px;margin-bottom:6px;}
+  .dropzone p{color:var(--text-muted);font-size:13.5px;}
+  .dropzone input{display:none;}
+  .dropzone.locked{opacity:.6;}
+  .dropzone-actions{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap;cursor:default;}
+  .dropzone-actions .btn svg{flex-shrink:0;}
+  .camera-preview{width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+  .status-pill.clickable{cursor:pointer;}
+  .status-pill.clickable:hover{filter:brightness(1.15);}
+  .ocr-text{display:none;margin-top:10px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--text-muted);line-height:1.6;max-height:160px;overflow-y:auto;white-space:pre-wrap;}
+  .ocr-text.open{display:block;}
+  .ocr-badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple-light);margin-bottom:6px;display:block;}
+  .material-generating{margin-top:8px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+  .material-generating::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--purple-light);animation:spin .8s linear infinite;}
+  .material-ready{color:var(--green);cursor:pointer;text-decoration:underline;}
+  .material-ready::before{display:none;}
+
+  .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .section-title h2{font-size:17px;}
+  .section-title a{font-size:13px;color:var(--purple-light);}
+
+  .content-list{display:flex;flex-direction:column;gap:10px;}
+  .content-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:16px;position:relative;}
+  .content-icon{width:40px;height:40px;border-radius:10px;background:rgba(123,92,250,.14);display:flex;align-items:center;justify-content:center;color:var(--purple-light);flex-shrink:0;}
+  .content-icon svg{width:19px;height:19px;}
+  .content-main{flex:1;min-width:0;}
+  .content-title{font-size:14.5px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .content-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:3px 9px;border-radius:20px;background:rgba(123,92,250,.12);color:var(--purple-light);border:1px solid var(--border);}
+  .tag.tag-explain{background:rgba(255,210,125,.14);color:var(--gold);}
+  .content-date{font-size:12px;color:var(--text-dim);white-space:nowrap;}
+
+  .export-wrap{position:relative;flex-shrink:0;}
+  .export-btn{border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .export-btn:hover{color:var(--white);border-color:var(--purple-light);}
+  .export-menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:150px;display:none;flex-direction:column;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.4);}
+  .export-menu.open{display:flex;}
+  .export-menu button{padding:8px 10px;font-size:13px;border-radius:7px;text-align:left;color:var(--text-muted);}
+  .export-menu button:hover{background:rgba(123,92,250,.14);color:var(--white);}
+
+  .materials-list{display:flex;flex-direction:column;gap:10px;}
+  .material-row{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;}
+  .progress-track{flex:1;height:6px;border-radius:6px;background:var(--bg-secondary);overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg, var(--purple), var(--purple-light));}
+  .status-pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .status-done{background:rgba(143,227,168,.14);color:var(--green);}
+  .status-processing{background:rgba(123,92,250,.14);color:var(--purple-light);}
+
+  .locked-row{background:var(--bg-card);border:1px dashed var(--border);border-radius:14px;padding:22px 20px;text-align:center;color:var(--text-muted);font-size:13.5px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+
+  /* ---------- CRONOGRAMA ---------- */
+  .schedule-form{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:30px;}
+  .schedule-field{margin-bottom:18px;}
+  .schedule-field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px;}
+  .schedule-field .hint{font-size:12px;color:var(--text-dim);margin-bottom:8px;}
+  .schedule-field textarea{
+    width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;
+  }
+  .schedule-field textarea:focus{outline:none;border-color:var(--purple-light);}
+  .schedule-field textarea::placeholder{color:var(--text-dim);}
+  .schedule-error{color:#ff9b9b;font-size:13px;margin-top:12px;}
+
+  .schedule-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;}
+  .schedule-day{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+  .schedule-day h3{font-size:14.5px;margin-bottom:14px;color:var(--purple-light);}
+  .schedule-block{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid var(--border);}
+  .schedule-block:first-of-type{border-top:none;padding-top:0;}
+  .schedule-time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);}
+  .schedule-activity{font-size:13.5px;color:var(--white);}
+  .schedule-empty-day{font-size:12.5px;color:var(--text-dim);}
+
+  /* ---------- CHAT VIEW ---------- */
+  .chat-view{display:none;flex-direction:column;height:100%;}
+  .chat-view.active{display:flex;}
+  .chat-header{padding:20px 40px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .chat-header h1{font-size:20px;display:flex;align-items:center;gap:10px;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);display:inline-block;}
+  .chat-header p{font-size:13px;color:var(--text-muted);}
+  .chat-messages{flex:1;overflow-y:auto;padding:28px 40px;display:flex;flex-direction:column;gap:18px;}
+  .msg{max-width:640px;font-size:14.5px;line-height:1.6;}
+  .msg-ai{align-self:flex-start;}
+  .msg-user{align-self:flex-end;}
+  .msg-bubble{padding:13px 17px;border-radius:16px;}
+  .msg-ai .msg-bubble{background:var(--bg-card);border:1px solid var(--border);border-bottom-left-radius:4px;}
+  .msg-user .msg-bubble{background:linear-gradient(135deg, var(--purple), #6247E0);border-bottom-right-radius:4px;}
+  .msg-label{font-size:11.5px;color:var(--text-dim);margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+  .msg-user .msg-label{text-align:right;}
+
+  .typing-dots{display:inline-flex;gap:4px;align-items:center;padding:4px 0;}
+  .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--purple-light);animation:blink 1.2s infinite;}
+  .typing-dots span:nth-child(2){animation-delay:.2s;}
+  .typing-dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+
+  .chat-input-wrap{padding:20px 40px 26px;border-top:1px solid var(--border);}
+  .chat-input-inner{display:flex;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:8px 8px 8px 18px;align-items:flex-end;}
+  .chat-input-inner:focus-within{border-color:var(--purple-light);}
+  #chatInput{flex:1;background:none;border:none;outline:none;color:var(--white);font-family:'Inter',sans-serif;font-size:14.5px;resize:none;padding:8px 0;max-height:120px;}
+  #chatInput::placeholder{color:var(--text-dim);}
+  .send-btn{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg, var(--purple), #6247E0);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s;}
+  .send-btn:disabled{opacity:.4;cursor:default;}
+  .chat-hint{font-size:11.5px;color:var(--text-dim);margin-top:10px;text-align:center;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(6,9,26,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:200;padding:24px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg-secondary);border:1px solid var(--border);border-radius:20px;width:100%;max-width:720px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal-header{padding:22px 26px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .modal-header h2{font-size:18px;margin-bottom:6px;}
+  .modal-header .modal-sub{font-size:12.5px;color:var(--text-muted);}
+  .modal-close{width:32px;height:32px;border-radius:9px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-muted);}
+  .modal-close:hover{color:var(--white);background:var(--bg-card-hover);}
+
+  .modal-tabs{display:flex;gap:6px;padding:14px 26px 0;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .modal-tab{padding:10px 15px;font-size:13.5px;color:var(--text-muted);border-radius:10px 10px 0 0;white-space:nowrap;position:relative;top:1px;}
+  .modal-tab.active{color:var(--white);background:var(--bg-card);border:1px solid var(--border);border-bottom:1px solid var(--bg-card);}
+
+  .modal-body{padding:24px 26px 30px;overflow-y:auto;flex:1;}
+  .modal-pane{display:none;}
+  .modal-pane.active{display:block;}
+
+  .resumo-text{font-size:14.5px;color:var(--text-muted);line-height:1.8;}
+  .resumo-text li{margin-bottom:10px;margin-left:18px;}
+  .resumo-text strong{color:var(--white);}
+
+  .flash-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
+  .flashcard{width:100%;max-width:420px;height:210px;perspective:1200px;cursor:pointer;}
+  .flashcard-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .flashcard-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;border:1px solid var(--border);font-size:15px;line-height:1.6;}
+  .flashcard-front{background:var(--bg-card);}
+  .flashcard-back{background:linear-gradient(135deg, var(--purple), #6247E0);transform:rotateY(180deg);}
+  .flash-face-label{position:absolute;top:14px;left:16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;}
+  .flashcard-back .flash-face-label{color:rgba(255,255,255,.65);}
+  .flash-controls{display:flex;align-items:center;gap:16px;}
+  .flash-nav-btn{width:36px;height:36px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--white);}
+  .flash-nav-btn:hover{border-color:var(--purple-light);}
+  .flash-counter{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--text-muted);}
+  .flash-hint{font-size:12px;color:var(--text-dim);}
+
+  .mindmap-wrap svg{width:100%;height:auto;}
+  .mm-line{stroke:var(--purple-light);stroke-width:1.4;opacity:.45;}
+  .mm-node-center rect{fill:var(--purple);stroke:none;}
+  .mm-node rect{fill:var(--bg-card);stroke:var(--border);stroke-width:1;}
+  .mm-label{font-family:'Inter',sans-serif;font-size:12px;fill:var(--white);}
+  .mm-label-center{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;fill:var(--white);}
+
+  .explain-text{font-size:14.5px;color:var(--text-muted);line-height:1.85;}
+  .explain-text p{margin-bottom:14px;}
+  .explain-text strong{color:var(--white);}
+  .explain-loading{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 20px;text-align:center;}
+  .explain-spinner{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--border);border-top-color:var(--purple-light);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .explain-loading p{font-size:13.5px;color:var(--text-dim);}
+  .explain-error{color:var(--text-muted);font-size:13.5px;text-align:center;padding:30px 20px;}
+  .explain-badge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);background:rgba(255,210,125,.1);border:1px solid var(--border);padding:5px 12px;border-radius:20px;margin-bottom:16px;}
+
+  /* audio pane */
+  .audio-player{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .audio-play-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg, var(--purple), #6247E0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px var(--purple-glow);flex-shrink:0;}
+  .waveform{display:flex;align-items:center;gap:3px;height:36px;}
+  .waveform span{width:3px;border-radius:3px;background:var(--purple-light);opacity:.55;height:8px;transition:height .15s ease;}
+  .waveform.playing span{animation:wf 1s ease-in-out infinite;opacity:1;}
+  .waveform span:nth-child(odd){animation-delay:.1s;}
+  .waveform span:nth-child(3n){animation-delay:.2s;}
+  .waveform span:nth-child(4n){animation-delay:.3s;}
+  @keyframes wf{0%,100%{height:8px;}50%{height:32px;}}
+  .audio-status{font-size:13px;color:var(--text-muted);text-align:center;}
+  .audio-status .mono{color:var(--purple-light);}
+  .audio-usage{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);text-align:center;}
+  .audio-usage strong{color:var(--purple-light);}
+
+  @media (max-width:920px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .app{flex-direction:column;}
+    .sidebar{width:100%;height:auto;flex-direction:row;align-items:center;padding:12px 16px;overflow-x:auto;}
+    .logo{padding:0 12px 0 0;}
+    .sidebar-divider,.objective-select-wrap,.hours-card,.sidebar-spacer,.plan-usage,.user-card,.lang-switch{display:none;}
+    .nav-group{display:flex;gap:4px;}
+    .nav-item{white-space:nowrap;}
+    .view{padding:24px 20px 50px;}
+    .chat-header,.chat-messages,.chat-input-wrap{padding-left:20px;padding-right:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-4 4-6 8-6s6 2 8 6c-2 4-4 6-8 6s-6-2-8-6z" stroke="white" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
+      </span>
+      Studycast AI
+    </div>
+
+    <div class="lang-switch">
+      <button id="langPtBtn" onclick="setLang('pt')">PT</button>
+      <button id="langEnBtn" onclick="setLang('en')">EN</button>
+    </div>
+
+    <div class="nav-group">
+      <button class="nav-item active" data-view="painel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span data-i18n="nav_dashboard">Painel</span>
+      </button>
+      <button class="nav-item" data-view="recente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+        <span data-i18n="nav_recent">Conteúdo recente</span>
+      </button>
+      <button class="nav-item" data-view="materiais">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        <span data-i18n="nav_materials">Meus materiais</span>
+      </button>
+      <button class="nav-item" data-view="chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+        <span data-i18n="nav_chat">Chat com IA</span>
+        <span class="badge live">24/7</span>
+      </button>
+      <button class="nav-item" data-view="cronograma">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        <span data-i18n="nav_schedule">Cronograma</span>
+      </button>
+      <button class="nav-item" data-view="config">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.06.07a2.16 2.16 0 1 1-3.06 3.06l-.07-.06a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.1 1.65V21a2.16 2.16 0 1 1-4.32 0v-.1a1.8 1.8 0 0 0-1.18-1.65 1.8 1.8 0 0 0-1.98.36l-.06.06a2.16 2.16 0 1 1-3.06-3.06l.06-.07a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.1H3a2.16 2.16 0 1 1 0-4.32h.1a1.8 1.8 0 0 0 1.65-1.18 1.8 1.8 0 0 0-.36-1.98l-.06-.06a2.16 2.16 0 1 1 3.06-3.06l.07.06a1.8 1.8 0 0 0 1.98.36H9.6a1.8 1.8 0 0 0 1.1-1.65V3a2.16 2.16 0 1 1 4.32 0v.1a1.8 1.8 0 0 0 1.1 1.65 1.8 1.8 0 0 0 1.98-.36l.06-.06a2.16 2.16 0 1 1 3.06 3.06l-.06.07a1.8 1.8 0 0 0-.36 1.98V9.6a1.8 1.8 0 0 0 1.65 1.1H21a2.16 2.16 0 1 1 0 4.32h-.1a1.8 1.8 0 0 0-1.65 1.1z"/></svg>
+        <span data-i18n="nav_settings">Configurações</span>
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="objective-select-wrap">
+      <div class="objective-select-label" data-i18n="objective_label">O que você quer estudar?</div>
+      <select class="objective-select" id="objectiveSelect">
+        <option data-i18n="obj_school">Prova escolar</option>
+        <option data-i18n="obj_personal">Estudo pessoal</option>
+        <option data-i18n="obj_exam">Concurso público</option>
+        <option data-i18n="obj_medical">Residência médica</option>
+        <option data-i18n="obj_job">Entrevista de emprego</option>
+        <option data-i18n="obj_presentation">Apresentação</option>
+        <option data-i18n="obj_other">Outro objetivo</option>
+      </select>
+    </div>
+
+    <div class="hours-card">
+      <div class="hours-label" data-i18n="hours_label">Horas de estudo</div>
+      <div class="hours-value js-stat-hours">0min</div>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="plan-usage" id="planUsage">
+      <div class="usage-label"><span data-i18n="usage_label">Materiais este mês</span><span id="usageCount">3/3</span></div>
+      <div class="usage-track"><div class="usage-fill" id="usageFill" style="width:100%"></div></div>
+    </div>
+
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">··</div>
+      <div class="user-info">
+        <div class="user-name" id="userNameLabel">···</div>
+        <div class="user-plan" id="userPlanLabel" data-i18n="plan_free_label">Plano Gratuito</div>
+      </div>
+      <button class="upgrade-btn" id="upgradeBtn" onclick="openUpgrade(userPlan==='free' ? 'plus' : 'premium')" title="Upgrade">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 8.5 12 15l10-6.5L12 2z"/><path d="M2 15.5 12 22l10-6.5M2 12l10 6.5L22 12"/></svg>
+      </button>
+      <button class="upgrade-btn" onclick="logout()" title="Logout" data-i18n-title="logout_title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PAINEL -->
+    <section class="view active" id="view-painel">
+      <div class="view-header">
+        <div>
+          <h1 id="helloHeading">Olá 👋</h1>
+          <p data-i18n="hello_sub">Aqui está um resumo do seu progresso nos estudos.</p>
+        </div>
+        <button class="btn btn-primary" onclick="switchView('materiais')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-i18n="new_material">Novo material</span>
+        </button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8"/></svg></div>
+          <div class="stat-label" data-i18n="stat_docs">Documentos</div>
+          <div class="stat-value js-stat-docs">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div class="stat-label" data-i18n="stat_processed">Materiais processados</div>
+          <div class="stat-value js-stat-processed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+          <div class="stat-label" data-i18n="stat_content">Conteúdos gerados</div>
+          <div class="stat-value js-stat-content">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="stat-label" data-i18n="stat_hours">Horas de estudo</div>
+          <div class="stat-value js-stat-hours">0min</div>
+        </div>
+      </div>
+
+      <div class="dropzone" onclick="switchView('materiais')">
+        <div class="dropzone-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        </div>
+        <h3 data-i18n="upload_title">Envie um novo material</h3>
+        <p data-i18n="upload_sub">PDF, DOCX, TXT ou cole seu texto diretamente</p>
+      </div>
+
+      <div class="section-title">
+        <h2 data-i18n="recent_content">Conteúdo recente</h2>
+        <a href="#" onclick="switchView('recente');return false;" data-i18n="see_all">Ver tudo</a>
+      </div>
+      <div class="content-list" id="painelRecentList"></div>
+    </section>
+
+    <!-- CONTEÚDO RECENTE -->
+    <section class="view" id="view-recente">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="recent_content">Conteúdo recente</h1>
+          <p data-i18n="recent_sub">Todo o material que você já transformou em conteúdo de estudo.</p>
+        </div>
+      </div>
+      <div class="content-list" id="fullRecentList"></div>
+      <div class="locked-row" id="lockedMoreRow" style="display:none;margin-top:10px;">
+        <span class="premium-pill" data-i18n="limit_reached">limite do plano gratuito</span>
+        <span data-i18n="limit_desc">Você atingiu o limite de materiais do mês. Assine um plano pago para continuar enviando.</span>
+        <button class="btn btn-primary" onclick="openUpgrade('plus')" data-i18n="see_plans">Ver planos</button>
+      </div>
+    </section>
+
+    <!-- MEUS MATERIAIS -->
+    <section class="view" id="view-materiais">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="my_materials">Meus materiais</h1>
+          <p data-i18n="my_materials_sub">Envie um material novo ou acompanhe o processamento dos existentes.</p>
+        </div>
+      </div>
+
+      <div class="dropzone" id="uploadDropzone">
+        <div class="dropzone-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        </div>
+        <h3 data-i18n="upload_title2">Arraste um arquivo ou clique para enviar</h3>
+        <p id="uploadSub" data-i18n="upload_sub2">PDF, DOCX, TXT — ou tire uma foto de anotações e provas</p>
+        <div class="dropzone-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-outline" onclick="handleUploadClick()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span data-i18n="upload_file_btn">Enviar arquivo</span>
+          </button>
+          <button class="btn btn-outline" onclick="handleCameraClick()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span data-i18n="upload_camera_btn">Tirar foto</span>
+          </button>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display:none">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+      </div>
+
+      <div class="section-title"><h2 data-i18n="materials_sent">Materiais enviados</h2></div>
+      <div class="materials-list"></div>
+    </section>
+
+    <!-- CRONOGRAMA -->
+    <section class="view" id="view-cronograma">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="schedule_title">Cronograma de estudos</h1>
+          <p data-i18n="schedule_sub">Conte o que você precisa estudar e os horários que tem livre — a IA monta uma agenda semanal pra você.</p>
+        </div>
+      </div>
+
+      <div class="schedule-form">
+        <div class="schedule-field">
+          <label data-i18n="schedule_tasks_label">O que você precisa estudar ou fazer essa semana?</label>
+          <div class="hint" data-i18n="schedule_tasks_hint">Ex: estudar matemática pra prova de sexta, fazer trabalho de história, revisar inglês, treinar redação...</div>
+          <textarea id="scheduleTasks" rows="3" data-i18n-placeholder="schedule_tasks_ph" placeholder="Escreva aqui o que precisa estudar/fazer..."></textarea>
+        </div>
+        <div class="schedule-field">
+          <label data-i18n="schedule_availability_label">Quais horários você tem livre durante a semana?</label>
+          <div class="hint" data-i18n="schedule_availability_hint">Ex: de segunda a sexta das 19h às 22h, sábado de manhã, domingo livre o dia todo...</div>
+          <textarea id="scheduleAvailability" rows="3" data-i18n-placeholder="schedule_availability_ph" placeholder="Escreva aqui seus horários livres..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-large" onclick="generateSchedule()" id="scheduleGenerateBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+          <span data-i18n="schedule_generate_cta">Gerar cronograma</span>
+        </button>
+        <div class="schedule-error" id="scheduleError"></div>
+      </div>
+
+      <div id="scheduleResult"></div>
+    </section>
+
+    <!-- CONFIG -->
+    <section class="view" id="view-config">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="settings">Configurações</h1>
+          <p data-i18n="settings_sub">Ajustes de conta em breve por aqui.</p>
+        </div>
+      </div>
+
+      <div class="section-title"><h2 data-i18n="admin_section_title">Modo administrador</h2></div>
+      <div id="adminPanel"></div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="chat-view" id="view-chat">
+      <div class="chat-header">
+        <div>
+          <h1><span class="live-dot"></span> <span data-i18n="chat_title">Chat com IA</span></h1>
+          <p data-i18n="chat_sub">Disponível 24 horas por dia, 7 dias por semana. Pergunte qualquer coisa sobre o que você está estudando.</p>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg msg-ai">
+          <div class="msg-label">Studycast AI</div>
+          <div class="msg-bubble" data-i18n="chat_greeting">Oi, Maria! Sou seu assistente de estudos, disponível 24/7. Pode me perguntar sobre qualquer material que você enviou, pedir pra reexplicar um conceito, ou só tirar uma dúvida. O que você quer estudar hoje?</div>
+        </div>
+      </div>
+      <div class="chat-input-wrap">
+        <div class="chat-input-inner">
+          <textarea id="chatInput" rows="1" placeholder="Pergunte algo sobre seus estudos..." data-i18n-placeholder="chat_placeholder"></textarea>
+          <button class="send-btn" id="sendBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+        <div class="chat-hint" id="chatHint" data-i18n="chat_hint">Plano gratuito: 10 mensagens por dia · O Studycast AI pode cometer erros.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- CONTENT VIEWER MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle">Título do material</h2>
+        <div class="modal-sub" id="modalSub">Objetivo · Data</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-tabs" id="modalTabs"></div>
+    <div class="modal-body">
+      <div class="modal-pane" data-pane="Resumo">
+        <ul class="resumo-text" id="paneResumo"></ul>
+      </div>
+      <div class="modal-pane" data-pane="Explicação">
+        <div id="paneExplain"></div>
+      </div>
+      <div class="modal-pane" data-pane="Flashcards">
+        <div class="flash-wrap">
+          <div class="flashcard" id="flashcardEl" onclick="flipFlashcard()">
+            <div class="flashcard-inner">
+              <div class="flashcard-face flashcard-front">
+                <span class="flash-face-label" data-i18n="question">Pergunta</span>
+                <span id="flashFront"></span>
+              </div>
+              <div class="flashcard-face flashcard-back">
+                <span class="flash-face-label" data-i18n="answer">Resposta</span>
+                <span id="flashBack"></span>
+              </div>
+            </div>
+          </div>
+          <div class="flash-controls">
+            <button class="flash-nav-btn" onclick="navFlashcard(-1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span class="flash-counter" id="flashCounter">1 / 5</span>
+            <button class="flash-nav-btn" onclick="navFlashcard(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="flash-hint" data-i18n="flash_hint">clique no cartão para virar</div>
+        </div>
+      </div>
+      <div class="modal-pane" data-pane="Mapa mental">
+        <div class="mindmap-wrap" id="paneMindmap"></div>
+      </div>
+      <div class="modal-pane" data-pane="Áudio">
+        <div id="audioPaneWrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeOverlay" onclick="if(event.target===this) closeUpgrade()">
+  <div class="modal upgrade-modal-wide">
+    <div class="modal-header">
+      <div>
+        <h2 data-i18n="upgrade_modal_title">Escolha seu plano</h2>
+        <div class="modal-sub" data-i18n="upgrade_modal_sub">Compare os dois planos pagos e assine o que fizer mais sentido pra você.</div>
+      </div>
+      <button class="modal-close" onclick="closeUpgrade()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body upgrade-plans-grid">
+      <div class="upgrade-plan-card popular">
+        <span class="upgrade-plan-badge" data-i18n="plan_popular_badge">mais escolhido</span>
+        <div class="upgrade-plan-name" data-i18n="plan_plus_name">Estudante</div>
+        <div class="upgrade-plan-price"><strong>R$ 9,90</strong>/<span data-i18n="upgrade_month">mês</span></div>
+        <ul class="upgrade-plan-features" id="upgradeFeaturesPlus"></ul>
+        <button class="btn btn-outline btn-block" onclick="confirmActivatePlan('plus')" data-i18n="plan_plus_cta">Assinar Estudante</button>
+      </div>
+      <div class="upgrade-plan-card">
+        <div class="upgrade-plan-name" data-i18n="plan_premium_name">Premium</div>
+        <div class="upgrade-plan-price"><strong>R$ 19,90</strong>/<span data-i18n="upgrade_month2">mês</span></div>
+        <ul class="upgrade-plan-features" id="upgradeFeaturesPremium"></ul>
+        <button class="btn btn-primary btn-block" onclick="confirmActivatePlan('premium')" data-i18n="plan_premium_cta">Assinar Premium</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8FE3A8" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toastText">Plano atualizado!</span>
+</div>
+
+<!-- OCR gratuito, roda no navegador, sem chave de API -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+  // ---------- i18n ----------
+  const translations = {
+    pt:{
+      nav_dashboard:"Painel", nav_recent:"Conteúdo recente", nav_materials:"Meus materiais", nav_chat:"Chat com IA", nav_schedule:"Cronograma", nav_settings:"Configurações",
+      objective_label:"O que você quer estudar?", hours_label:"Horas de estudo", hours_sub:"↑ 6h esta semana",
+      usage_label:"Materiais este mês", plan_free_label:"Plano Gratuito", plan_plus_label:"Plano Estudante", plan_premium_label:"Plano Premium",
+      obj_school:"Prova escolar", obj_personal:"Estudo pessoal", obj_exam:"Concurso público", obj_medical:"Residência médica",
+      obj_job:"Entrevista de emprego", obj_presentation:"Apresentação", obj_other:"Outro objetivo",
+      hello:"Olá", hello_sub:"Aqui está um resumo do seu progresso nos estudos.", new_material:"Novo material",
+      stat_docs:"Documentos", stat_processed:"Materiais processados", stat_content:"Conteúdos gerados", stat_hours:"Horas de estudo",
+      up:"↑ 12 esta semana", up2:"↑ 9 esta semana", up3:"↑ 38 esta semana", up4:"↑ 6h esta semana",
+      upload_title:"Envie um novo material", upload_sub:"PDF, DOCX, TXT ou cole seu texto diretamente",
+      recent_content:"Conteúdo recente", see_all:"Ver tudo", recent_sub:"Todo o material que você já transformou em conteúdo de estudo.",
+      limit_reached:"limite do plano gratuito", limit_desc:"Você atingiu o limite de materiais do mês. Assine um plano pago para continuar enviando.", see_plans:"Ver planos",
+      my_materials:"Meus materiais", my_materials_sub:"Envie um material novo ou acompanhe o processamento dos existentes.",
+      upload_title2:"Arraste um arquivo ou clique para enviar", upload_sub2:"PDF, DOCX, TXT — ou tire uma foto de anotações e provas",
+      upload_file_btn:"Enviar arquivo", upload_camera_btn:"Tirar foto",
+      ocr_reading:"Lendo texto da imagem...", ocr_downloading:"Baixando leitor de texto (só na 1ª vez)...",
+      ocr_done:"texto extraído · ver", ocr_empty:"nenhum texto encontrado", ocr_error:"não consegui ler a imagem",
+      ocr_badge:"texto extraído por OCR gratuito",
+      file_processing:"Lendo o arquivo...", file_badge:"texto extraído do arquivo",
+      file_unsupported:"formato não suportado (use PDF, DOCX ou TXT)", file_error:"não consegui processar o arquivo",
+      file_pdf_no_text:"PDF sem texto selecionável (parece escaneado) — leitura de imagem ainda não suportada",
+      material_generating:"Gerando resumo, flashcards e mapa mental...", material_ready:"material pronto · abrir",
+      material_error:"não consegui gerar o material agora",
+      empty_materials_title:"Você ainda não enviou nenhum material",
+      empty_materials_desc:"Envie uma foto, PDF, DOCX ou TXT em \"Meus materiais\" para gerar seu primeiro resumo, flashcards e mapa mental.",
+      upload_locked:"Limite mensal atingido — assine um plano para enviar mais",
+      materials_sent:"Materiais enviados", status_done:"concluído", status_processing:"processando", status_done2:"concluído",
+      settings:"Configurações", settings_sub:"Ajustes de conta em breve por aqui.",
+      admin_label:"Modo administrador", admin_section_title:"Modo administrador",
+      admin_active_title:"Modo administrador ativado", admin_active_desc:"Todos os recursos pagos liberados, sem contar nos limites do plano.",
+      admin_deactivate_cta:"Desativar",
+      admin_inactive_title:"Testar como administrador", admin_inactive_desc:"Digite o código de administrador pra liberar todos os planos sem pagar, só pra você testar o site.",
+      admin_code_ph:"Código de administrador", admin_activate_cta:"Ativar", admin_code_wrong:"Código incorreto.",
+      admin_activated:"Modo administrador ativado! Tudo liberado. 🔑", admin_deactivated:"Modo administrador desativado.",
+      schedule_title:"Cronograma de estudos", schedule_sub:"Conte o que você precisa estudar e os horários que tem livre — a IA monta uma agenda semanal pra você.",
+      schedule_tasks_label:"O que você precisa estudar ou fazer essa semana?",
+      schedule_tasks_hint:"Ex: estudar matemática pra prova de sexta, fazer trabalho de história, revisar inglês, treinar redação...",
+      schedule_tasks_ph:"Escreva aqui o que precisa estudar/fazer...",
+      schedule_availability_label:"Quais horários você tem livre durante a semana?",
+      schedule_availability_hint:"Ex: de segunda a sexta das 19h às 22h, sábado de manhã, domingo livre o dia todo...",
+      schedule_availability_ph:"Escreva aqui seus horários livres...",
+      schedule_generate_cta:"Gerar cronograma", schedule_missing_fields:"Preencha os dois campos antes de gerar.",
+      schedule_generating:"Montando seu cronograma da semana...",
+      schedule_error:"Não consegui gerar o cronograma agora. Tente novamente em instantes.",
+      schedule_day_empty:"Sem atividades nesse dia.",
+      chat_title:"Chat com IA", chat_sub:"Disponível 24 horas por dia, 7 dias por semana. Pergunte qualquer coisa sobre o que você está estudando.",
+      chat_greeting:"Oi, Maria! Sou seu assistente de estudos, disponível 24/7. Pode me perguntar sobre qualquer material que você enviou, pedir pra reexplicar um conceito, ou só tirar uma dúvida. O que você quer estudar hoje?",
+      chat_placeholder:"Pergunte algo sobre seus estudos...",
+      chat_hint:"Plano gratuito: 10 mensagens por dia · O Studycast AI pode cometer erros.",
+      chat_hint_unlimited:"Chat 24/7 sem limite diário · O Studycast AI pode cometer erros.",
+      chat_limit_msg:"Você atingiu o limite de 10 mensagens gratuitas de hoje. Assine o plano Estudante para conversar sem limites, 24/7.",
+      question:"Pergunta", answer:"Resposta", flash_hint:"clique no cartão para virar",
+      upgrade_from:"a partir de",
+      upgrade_modal_title:"Escolha seu plano", upgrade_modal_sub:"Compare os dois planos pagos e assine o que fizer mais sentido pra você.",
+      plan_popular_badge:"mais escolhido", plan_plus_name:"Estudante", plan_premium_name:"Premium",
+      upgrade_month:"mês", upgrade_month2:"mês", plan_plus_cta:"Assinar Estudante", plan_premium_cta:"Assinar Premium",
+      toast_upgraded_plus:"Plano atualizado para Estudante! Explicação completa liberada, até 10h de áudio/mês 🎉",
+      toast_upgraded_premium:"Plano atualizado para Premium! 🎉",
+      explain_loading:"Gerando uma explicação completa sobre o tema...",
+      explain_badge:"gerado pela IA", explain_error:"Tive um problema para gerar a explicação agora. Tente novamente em instantes.",
+      chat_error:"Tive um problema para responder agora. Tente novamente em instantes.",
+      explain_locked_title:"Explicação completa sobre o tema",
+      explain_locked_desc:"A explicação completa é um recurso dos planos pagos. Assine o Estudante para a IA explicar o máximo possível sobre qualquer material, sem limites.",
+      explain_locked_cta:"Ver planos",
+      audio_limit_title:"Limite de áudio do mês atingido",
+      audio_limit_desc_free:"Você usou seus 15 minutos gratuitos de áudio este mês. Assine o Estudante para ter até 5 horas de áudio por mês.",
+      audio_limit_desc_paid:"Você usou suas 10 horas de áudio deste mês. A cota renova no início do próximo mês.",
+      audio_limit_cta:"Assinar Estudante",
+      audio_play_hint:"Toque para", audio_play_action:"ouvir a explicação completa", audio_play_suffix:"em voz alta",
+      audio_preparing_text:"Preparando a explicação completa...",
+      audio_playing:"Reproduzindo", audio_playing_suffix:"...", audio_generating:"Gerando áudio com voz natural...",
+      audio_error:"Não consegui gerar o áudio agora. Verifique se o servidor está rodando e tente de novo.",
+      audio_global_cap:"O áudio está temporariamente pausado no site inteiro (limite geral do mês atingido). Tente de novo mais tarde.",
+      audio_rate_limited:"Você gerou áudio demais na última hora. Espere um pouco e tente de novo.",
+      audio_too_large:"Esse material é grande demais para gerar áudio de uma vez.",
+      audio_unsupported:"Seu navegador não suporta leitura em voz alta.",
+      audio_usage_minutes:"min usados este mês", audio_usage_unlimited:"Áudio ilimitado (modo administrador)"
+    },
+    en:{
+      nav_dashboard:"Dashboard", nav_recent:"Recent content", nav_materials:"My materials", nav_chat:"AI chat", nav_schedule:"Schedule", nav_settings:"Settings",
+      objective_label:"What do you want to study?", hours_label:"Study hours", hours_sub:"↑ 6h this week",
+      usage_label:"Materials this month", plan_free_label:"Free plan", plan_plus_label:"Student plan", plan_premium_label:"Premium plan",
+      obj_school:"School exam", obj_personal:"Personal study", obj_exam:"Public exam", obj_medical:"Medical residency",
+      obj_job:"Job interview", obj_presentation:"Presentation", obj_other:"Another goal",
+      hello:"Hi", hello_sub:"Here's a summary of your study progress.", new_material:"New material",
+      stat_docs:"Documents", stat_processed:"Materials processed", stat_content:"Content generated", stat_hours:"Study hours",
+      up:"↑ 12 this week", up2:"↑ 9 this week", up3:"↑ 38 this week", up4:"↑ 6h this week",
+      upload_title:"Upload a new material", upload_sub:"PDF, DOCX, TXT or paste your text directly",
+      recent_content:"Recent content", see_all:"See all", recent_sub:"All the material you've already turned into study content.",
+      limit_reached:"free plan limit", limit_desc:"You've reached this month's material limit. Subscribe to a paid plan to keep uploading.", see_plans:"See plans",
+      my_materials:"My materials", my_materials_sub:"Upload a new material or track the processing of existing ones.",
+      upload_title2:"Drag a file or click to upload", upload_sub2:"PDF, DOCX, TXT — or take a photo of your notes and exams",
+      upload_file_btn:"Upload file", upload_camera_btn:"Take a photo",
+      ocr_reading:"Reading text from image...", ocr_downloading:"Downloading text reader (first time only)...",
+      ocr_done:"text extracted · view", ocr_empty:"no text found", ocr_error:"couldn't read the image",
+      ocr_badge:"text extracted by free OCR",
+      file_processing:"Reading the file...", file_badge:"text extracted from the file",
+      file_unsupported:"unsupported format (use PDF, DOCX or TXT)", file_error:"couldn't process the file",
+      file_pdf_no_text:"PDF has no selectable text (looks scanned) — image reading isn't supported yet",
+      material_generating:"Generating summary, flashcards and mind map...", material_ready:"material ready · open",
+      material_error:"couldn't generate the material right now",
+      empty_materials_title:"You haven't uploaded any material yet",
+      empty_materials_desc:"Upload a photo, PDF, DOCX or TXT in \"My materials\" to generate your first summary, flashcards and mind map.",
+      upload_locked:"Monthly limit reached — subscribe to a plan to upload more",
+      materials_sent:"Uploaded materials", status_done:"done", status_processing:"processing", status_done2:"done",
+      settings:"Settings", settings_sub:"Account settings coming soon.",
+      admin_label:"Admin mode", admin_section_title:"Admin mode",
+      admin_active_title:"Admin mode enabled", admin_active_desc:"All paid features unlocked, without counting against plan limits.",
+      admin_deactivate_cta:"Deactivate",
+      admin_inactive_title:"Test as admin", admin_inactive_desc:"Enter the admin code to unlock every plan without paying, just for you to test the site.",
+      admin_code_ph:"Admin code", admin_activate_cta:"Activate", admin_code_wrong:"Wrong code.",
+      admin_activated:"Admin mode activated! Everything unlocked. 🔑", admin_deactivated:"Admin mode deactivated.",
+      schedule_title:"Study schedule", schedule_sub:"Tell us what you need to study and when you're free — the AI builds a weekly schedule for you.",
+      schedule_tasks_label:"What do you need to study or do this week?",
+      schedule_tasks_hint:"E.g: study math for Friday's test, work on a history assignment, review English, practice writing...",
+      schedule_tasks_ph:"Write what you need to study/do...",
+      schedule_availability_label:"What times are you free during the week?",
+      schedule_availability_hint:"E.g: Monday to Friday from 7pm to 10pm, Saturday morning, Sunday free all day...",
+      schedule_availability_ph:"Write your free time slots...",
+      schedule_generate_cta:"Generate schedule", schedule_missing_fields:"Fill in both fields before generating.",
+      schedule_generating:"Building your weekly schedule...",
+      schedule_error:"Couldn't generate the schedule right now. Please try again shortly.",
+      schedule_day_empty:"No activities that day.",
+      chat_title:"AI chat", chat_sub:"Available 24 hours a day, 7 days a week. Ask anything about what you're studying.",
+      chat_greeting:"Hi, Maria! I'm your study assistant, available 24/7. Ask me about any material you've uploaded, ask me to re-explain a concept, or just ask a question. What do you want to study today?",
+      chat_placeholder:"Ask something about your studies...",
+      chat_hint:"Free plan: 10 messages per day · Studycast AI can make mistakes.",
+      chat_hint_unlimited:"24/7 chat with no daily limit · Studycast AI can make mistakes.",
+      chat_limit_msg:"You've reached today's free limit of 10 messages. Subscribe to the Student plan to chat without limits, 24/7.",
+      question:"Question", answer:"Answer", flash_hint:"click the card to flip",
+      upgrade_from:"starting at",
+      upgrade_modal_title:"Choose your plan", upgrade_modal_sub:"Compare both paid plans and subscribe to the one that makes the most sense for you.",
+      plan_popular_badge:"most popular", plan_plus_name:"Student", plan_premium_name:"Premium",
+      upgrade_month:"mo", upgrade_month2:"mo", plan_plus_cta:"Subscribe to Student", plan_premium_cta:"Subscribe to Premium",
+      toast_upgraded_plus:"Upgraded to Student! Full explanation unlocked, up to 10h of audio/month 🎉",
+      toast_upgraded_premium:"Upgraded to Premium! 🎉",
+      explain_loading:"Generating a complete explanation about the topic...",
+      explain_badge:"AI-generated", explain_error:"I had trouble generating the explanation right now. Please try again shortly.",
+      chat_error:"I had trouble responding right now. Please try again shortly.",
+      explain_locked_title:"Full explanation of the topic",
+      explain_locked_desc:"The full explanation is a paid-plan feature. Subscribe to Student to have the AI explain as much as possible about any material, with no limits.",
+      explain_locked_cta:"See plans",
+      audio_limit_title:"Monthly audio limit reached",
+      audio_limit_desc_free:"You've used your 15 free minutes of audio this month. Subscribe to Student to get up to 5 hours of audio per month.",
+      audio_limit_desc_paid:"You've used your 10 hours of audio this month. The quota resets at the start of next month.",
+      audio_limit_cta:"Subscribe to Student",
+      audio_play_hint:"Tap to", audio_play_action:"listen to the full explanation", audio_play_suffix:"out loud",
+      audio_preparing_text:"Preparing the full explanation...",
+      audio_playing:"Playing", audio_playing_suffix:"...", audio_generating:"Generating audio with a natural voice...",
+      audio_error:"Couldn't generate the audio right now. Check that the server is running and try again.",
+      audio_global_cap:"Audio is temporarily paused site-wide (monthly overall cap reached). Please try again later.",
+      audio_rate_limited:"You've generated too much audio in the last hour. Please wait a bit and try again.",
+      audio_too_large:"This material is too large to generate audio for at once.",
+      audio_unsupported:"Your browser doesn't support text-to-speech.",
+      audio_usage_minutes:"min used this month", audio_usage_unlimited:"Unlimited audio (admin mode)"
+    }
+  };
+  let currentLang = localStorage.getItem('scLang') || 'pt';
+
+  function t(key){ return translations[currentLang][key] || translations.pt[key] || key; }
+
+  function setLang(lang){
+    currentLang = lang;
+    localStorage.setItem('scLang', lang);
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('langPtBtn').classList.toggle('active', lang==='pt');
+    document.getElementById('langEnBtn').classList.toggle('active', lang==='en');
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if(translations[lang][key] !== undefined) el.textContent = translations[lang][key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(translations[lang][key] !== undefined) el.placeholder = translations[lang][key];
+    });
+    updatePlanLabels();
+    refreshLists();
+    updateGreeting();
+  }
+
+  function updateGreeting(){
+    const heading = document.getElementById('helloHeading');
+    if(!heading) return;
+    if(currentUser){
+      const firstName = currentUser.name.trim().split(/\s+/)[0];
+      heading.textContent = `${t('hello')}, ${firstName} 👋`;
+    } else {
+      heading.textContent = `${t('hello')} 👋`;
+    }
+  }
+
+  function updatePlanLabels(){
+    const unlocked = isAdmin || userPlan !== 'free';
+    document.getElementById('chatHint').textContent = unlocked ? t('chat_hint_unlimited') : t('chat_hint');
+    if(isAdmin){
+      document.getElementById('userPlanLabel').textContent = t('admin_label');
+    } else {
+      const planLabelKey = userPlan==='free' ? 'plan_free_label' : (userPlan==='plus' ? 'plan_plus_label' : 'plan_premium_label');
+      document.getElementById('userPlanLabel').textContent = t(planLabelKey);
+    }
+    document.getElementById('upgradeBtn').style.display = (isAdmin || userPlan === 'premium') ? 'none' : 'flex';
+  }
+
+  // ---------- plan state ----------
+  let userPlan = 'free'; // 'free' | 'plus' | 'premium'
+  const FREE_MATERIAL_LIMIT = 3;
+
+  // ---------- admin mode (dono do site testando sem pagar) ----------
+  // o codigo e validado so no servidor agora (nunca fica exposto no JS do navegador).
+  let isAdmin = false; // definido a partir de currentUser.isAdmin depois do login
+
+  async function checkAdminFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('admin');
+    if(code){
+      await activateAdmin(code, false);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  async function activateAdmin(code, notify){
+    try{
+      const res = await fetch('/api/auth/admin', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ code })
+      });
+      if(!res.ok) return false;
+      const data = await res.json();
+      isAdmin = true;
+      currentUser = data.user;
+      updatePlanLabels();
+      refreshLists();
+      fetchAudioUsage();
+      if(notify !== false) showToast(t('admin_activated'));
+      return true;
+    } catch(err){
+      console.error(err);
+      return false;
+    }
+  }
+
+  async function deactivateAdmin(){
+    try{ await fetch('/api/auth/admin/deactivate', { method:'POST' }); } catch(err){}
+    isAdmin = false;
+    updatePlanLabels();
+    refreshLists();
+    renderAdminPanel();
+    fetchAudioUsage();
+    showToast(t('admin_deactivated'));
+  }
+
+  const lockIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  // audio agora e liberado em todos os planos, com cota mensal real (em minutos) controlada
+  // pelo servidor — nao e mais travado por plano. isAudioBlocked() reflete a cota atual.
+  let audioUsage = null; // preenchido por fetchAudioUsage()
+  function isAudioBlocked(){ return !isAdmin && audioUsage && audioUsage.percent >= 100; }
+  function isExplainLocked(){ return !isAdmin && userPlan === 'free'; }
+  const FREE_CHAT_LIMIT = 10;
+  let chatCountToday = 0;
+
+  // ---------- dados reais da conta (buscados do servidor, nada de exemplo fixo) ----------
+  let contentData = [];
+
+  function formatRelativeDate(iso){
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if(mins < 1) return currentLang==='pt' ? 'agora mesmo' : 'just now';
+    if(mins < 60) return currentLang==='pt' ? `há ${mins} min` : `${mins} min ago`;
+    const hours = Math.floor(mins / 60);
+    if(hours < 24) return currentLang==='pt' ? `há ${hours}h` : `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if(days === 1) return currentLang==='pt' ? 'ontem' : 'yesterday';
+    if(days < 30) return currentLang==='pt' ? `há ${days} dias` : `${days} days ago`;
+    return new Date(iso).toLocaleDateString(currentLang==='pt' ? 'pt-BR' : 'en-US');
+  }
+
+  function materialToItem(m){
+    return {
+      id: m.id,
+      title: m.title,
+      types: ['Resumo','Flashcards','Mapa mental','Áudio'],
+      goal: m.goal,
+      date: formatRelativeDate(m.date),
+      resumo: m.resumo || [],
+      flashcards: m.flashcards || [],
+      mindmap: m.mindmap || [],
+      explanation: m.explanation ? m.explanation.split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('') : null
+    };
+  }
+
+  async function fetchMaterials(){
+    try{
+      const res = await fetch('/api/materials');
+      if(!res.ok) return;
+      const data = await res.json();
+      contentData = (data.materials || []).map(materialToItem);
+      refreshLists();
+    } catch(err){
+      console.error('nao consegui carregar materiais:', err);
+    }
+  }
+
+  async function fetchStats(){
+    try{
+      const res = await fetch('/api/stats');
+      if(!res.ok) return;
+      const s = await res.json();
+      const hours = Math.floor(s.studyMinutes / 60);
+      const mins = s.studyMinutes % 60;
+      const hoursLabel = s.studyMinutes < 60 ? `${s.studyMinutes}min` : `${hours}h${mins ? mins+'min' : ''}`;
+      document.querySelectorAll('.js-stat-docs').forEach(el=> el.textContent = s.documentsCount);
+      document.querySelectorAll('.js-stat-processed').forEach(el=> el.textContent = s.materialsProcessed);
+      document.querySelectorAll('.js-stat-content').forEach(el=> el.textContent = s.contentGenerated);
+      document.querySelectorAll('.js-stat-hours').forEach(el=> el.textContent = hoursLabel);
+    } catch(err){
+      console.error('nao consegui carregar estatisticas:', err);
+    }
+  }
+
+  const iconFor = {
+    "Resumo": '<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+    "Flashcards": '<rect x="3" y="6" width="14" height="12" rx="2"/><rect x="7" y="3" width="14" height="12" rx="2"/>',
+    "Mapa mental": '<circle cx="12" cy="6" r="2.2"/><circle cx="6" cy="17" r="2.2"/><circle cx="18" cy="17" r="2.2"/><path d="M12 8.2V13M12 13 7 15M12 13l5 2"/>',
+    "Áudio": '<path d="M3 12h3l2-6 4 12 3-9 2 3h4"/>'
+  };
+
+  function renderContentCard(item, index){
+    const locked = !isAdmin && userPlan === 'free' && index >= FREE_MATERIAL_LIMIT;
+    const primaryType = item.types[0];
+    if(locked){
+      return `
+        <div class="content-card" style="opacity:.5;cursor:default;">
+          <div class="content-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="content-main">
+            <div class="content-title">${item.title}</div>
+            <div class="content-meta"><span class="content-date">${item.goal} · ${item.date}</span></div>
+          </div>
+          <button class="btn btn-outline" onclick="openUpgrade('plus')" style="font-size:12.5px;padding:8px 12px;">${t('see_plans')}</button>
+        </div>`;
+    }
+    return `
+      <div class="content-card" onclick="openModal(${item.id})" style="cursor:pointer;">
+        <div class="content-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${iconFor[primaryType]||''}</svg></div>
+        <div class="content-main">
+          <div class="content-title">${item.title}</div>
+          <div class="content-meta">
+            ${item.types.map(tp=> tp==='Áudio' && isAudioBlocked()
+              ? `<span class="tag tag-lock">${lockIcon}${tp}</span>`
+              : `<span class="tag">${tp}</span>`
+            ).join('')}
+            ${isExplainLocked()
+              ? `<span class="tag tag-lock">${lockIcon}${currentLang==='pt' ? 'Explicação' : 'Explanation'}</span>`
+              : `<span class="tag tag-explain">✦ ${currentLang==='pt' ? 'Explicação' : 'Explanation'}</span>`
+            }
+            <span class="content-date">· ${item.goal} · ${item.date}</span>
+          </div>
+        </div>
+        <div class="export-wrap">
+          <button class="export-btn" onclick="event.stopPropagation();toggleExport(this)">
+            ${currentLang==='pt' ? 'Exportar' : 'Export'}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="export-menu">
+            <button>PDF</button>
+            <button>Word</button>
+            <button>Excel</button>
+            <button>Google Docs</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function emptyStateHtml(){
+    return `<div class="locked-row">
+      <span>${t('empty_materials_title')}</span>
+      <span>${t('empty_materials_desc')}</span>
+    </div>`;
+  }
+
+  function refreshLists(){
+    document.getElementById('painelRecentList').innerHTML = contentData.length
+      ? contentData.slice(0,3).map((c,i)=>renderContentCard(c,i)).join('')
+      : emptyStateHtml();
+    document.getElementById('fullRecentList').innerHTML = contentData.length
+      ? contentData.map((c,i)=>renderContentCard(c,i)).join('')
+      : emptyStateHtml();
+    const freeLimited = !isAdmin && userPlan==='free';
+    document.getElementById('lockedMoreRow').style.display = (freeLimited && contentData.length > FREE_MATERIAL_LIMIT) ? 'flex' : 'none';
+
+    const usedMaterials = freeLimited ? Math.min(contentData.length, FREE_MATERIAL_LIMIT) : contentData.length;
+    document.getElementById('usageCount').textContent = freeLimited ? `${usedMaterials}/${FREE_MATERIAL_LIMIT}` : (currentLang==='pt' ? 'ilimitado' : 'unlimited');
+    document.getElementById('usageFill').style.width = '100%';
+    document.getElementById('planUsage').style.display = freeLimited ? 'block' : 'none';
+
+    const dz = document.getElementById('uploadDropzone');
+    const dzSub = document.getElementById('uploadSub');
+    if(freeLimited && contentData.length >= FREE_MATERIAL_LIMIT){
+      dz.classList.add('locked');
+      dzSub.textContent = t('upload_locked');
+    } else {
+      dz.classList.remove('locked');
+      dzSub.textContent = t('upload_sub2');
+    }
+  }
+
+  function handleUploadClick(){
+    if(!isAdmin && userPlan==='free' && contentData.length >= FREE_MATERIAL_LIMIT){ openUpgrade('plus'); return; }
+    document.getElementById('fileInput').click();
+  }
+
+  function handleCameraClick(){
+    if(!isAdmin && userPlan==='free' && contentData.length >= FREE_MATERIAL_LIMIT){ openUpgrade('plus'); return; }
+    document.getElementById('cameraInput').click();
+  }
+
+  // stores extracted text per material row (from OCR photos or parsed PDF/DOCX/TXT),
+  // keyed by a row id — this is what gets sent to the AI instead of the raw file
+  const extractedText = {};
+  let materialRowSeq = 0;
+
+  function addMaterialRow(name, thumbUrl){
+    const list = document.querySelector('.materials-list');
+    const row = document.createElement('div');
+    row.className = 'material-row';
+    const iconHtml = thumbUrl
+      ? `<img class="camera-preview" src="${thumbUrl}" alt="">`
+      : `<div class="content-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/></svg></div>`;
+    row.innerHTML = `
+      ${iconHtml}
+      <div class="content-main">
+        <div class="content-title">${name}</div>
+        <div class="progress-track"><div class="progress-fill" style="width:8%"></div></div>
+      </div>
+      <span class="status-pill status-processing">${t('status_processing')}</span>`;
+    list.prepend(row);
+    return row;
+  }
+
+  document.getElementById('fileInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const row = addMaterialRow(file.name, null);
+    parseFile(row, file);
+    e.target.value = '';
+  });
+
+  // envia o PDF/DOCX/TXT pro servidor e extrai o texto de verdade (pdf-parse / mammoth)
+  async function parseFile(row, file){
+    const rowId = 'file' + (materialRowSeq++);
+    row.dataset.ocrId = rowId;
+    const fill = row.querySelector('.progress-fill');
+    const pill = row.querySelector('.status-pill');
+
+    pill.textContent = t('file_processing');
+    fill.style.width = '40%';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try{
+      const response = await fetch('/api/parse-file', { method:'POST', body: formData });
+      const data = await response.json();
+      fill.style.width = '100%';
+
+      if(!response.ok){
+        pill.textContent = data.error === 'unsupported_type' || data.error === 'doc_unsupported' ? t('file_unsupported')
+          : data.error === 'pdf_no_text' ? t('file_pdf_no_text')
+          : t('file_error');
+        pill.classList.remove('status-processing');
+        pill.classList.add('status-done');
+        return;
+      }
+
+      const text = (data.text || '').trim();
+      extractedText[rowId] = text;
+
+      if(text){
+        pill.textContent = t('ocr_done');
+        pill.classList.remove('status-processing');
+        pill.classList.add('status-done', 'clickable');
+        pill.onclick = ()=> toggleOcrText(row, rowId);
+
+        const box = document.createElement('div');
+        box.className = 'ocr-text';
+        box.innerHTML = `<span class="ocr-badge">${t('file_badge')}</span>${escapeHtml(text.slice(0,4000))}`;
+        row.querySelector('.content-main').appendChild(box);
+
+        const type = file.name.split('.').pop().toUpperCase();
+        generateMaterialFromRow(row, file.name, type, text);
+      } else {
+        pill.textContent = t('ocr_empty');
+        pill.classList.remove('status-processing');
+        pill.classList.add('status-done');
+      }
+    } catch(err){
+      console.error(err);
+      fill.style.width = '100%';
+      pill.textContent = t('file_error');
+      pill.classList.remove('status-processing');
+      pill.classList.add('status-done');
+    }
+  }
+
+  document.getElementById('cameraInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const label = currentLang==='pt' ? 'Foto' : 'Photo';
+      const name = `${label} — ${new Date().toLocaleDateString(currentLang==='pt' ? 'pt-BR' : 'en-US')}.jpg`;
+      const row = addMaterialRow(name, reader.result);
+      runOCR(row, reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  });
+
+  // ---------- free OCR (Tesseract.js — no API key, runs in the browser) ----------
+  async function runOCR(row, imageDataUrl){
+    const rowId = 'ocr' + (materialRowSeq++);
+    row.dataset.ocrId = rowId;
+    const fill = row.querySelector('.progress-fill');
+    const pill = row.querySelector('.status-pill');
+    const lang = currentLang === 'pt' ? 'por' : 'eng';
+
+    pill.textContent = t('ocr_reading');
+
+    try{
+      const { data } = await Tesseract.recognize(imageDataUrl, lang, {
+        logger: (m)=>{
+          if(m.status === 'recognizing text'){
+            const pct = Math.round(m.progress * 100);
+            fill.style.width = pct + '%';
+            pill.textContent = `${t('ocr_reading')} ${pct}%`;
+          } else if(m.status === 'loading language traineddata' || m.status === 'loading tesseract core'){
+            pill.textContent = t('ocr_downloading');
+          }
+        }
+      });
+
+      const text = (data.text || '').trim();
+      extractedText[rowId] = text;
+      fill.style.width = '100%';
+
+      if(text){
+        pill.textContent = t('ocr_done');
+        pill.classList.remove('status-processing');
+        pill.classList.add('status-done', 'clickable');
+        pill.onclick = ()=> toggleOcrText(row, rowId);
+
+        const ocrBox = document.createElement('div');
+        ocrBox.className = 'ocr-text';
+        ocrBox.innerHTML = `<span class="ocr-badge">${t('ocr_badge')}</span>${escapeHtml(text)}`;
+        row.querySelector('.content-main').appendChild(ocrBox);
+
+        const photoTitle = row.querySelector('.content-title').textContent;
+        generateMaterialFromRow(row, photoTitle, currentLang==='pt' ? 'Foto' : 'Photo', text);
+      } else {
+        pill.textContent = t('ocr_empty');
+        pill.classList.remove('status-processing');
+        pill.classList.add('status-done');
+      }
+    } catch(err){
+      console.error(err);
+      pill.textContent = t('ocr_error');
+      pill.classList.remove('status-processing');
+      pill.classList.add('status-done');
+    }
+  }
+
+  // gera resumo/flashcards/mapa mental de verdade a partir do texto extraido,
+  // salva o material na conta do usuario, e atualiza a biblioteca/estatisticas
+  async function generateMaterialFromRow(row, title, type, text){
+    const badge = document.createElement('div');
+    badge.className = 'material-generating';
+    badge.textContent = t('material_generating');
+    row.querySelector('.content-main').appendChild(badge);
+
+    try{
+      const res = await fetch('/api/materials', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ title, type, sourceText: text, lang: currentLang })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'material_failed');
+
+      badge.textContent = t('material_ready');
+      badge.classList.add('material-ready');
+      badge.onclick = ()=>{ switchView('recente'); openModal(data.material.id); };
+
+      await fetchMaterials();
+      fetchStats();
+    } catch(err){
+      console.error(err);
+      badge.textContent = t('material_error');
+    }
+  }
+
+  function toggleOcrText(row, rowId){
+    const box = row.querySelector('.ocr-text');
+    if(box) box.classList.toggle('open');
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ---------- cronograma de estudos (IA monta a agenda semanal) ----------
+  async function generateSchedule(){
+    const tasks = document.getElementById('scheduleTasks').value.trim();
+    const availability = document.getElementById('scheduleAvailability').value.trim();
+    const errEl = document.getElementById('scheduleError');
+    const resultEl = document.getElementById('scheduleResult');
+    const btn = document.getElementById('scheduleGenerateBtn');
+    errEl.textContent = '';
+
+    if(!tasks || !availability){
+      errEl.textContent = t('schedule_missing_fields');
+      return;
+    }
+
+    btn.disabled = true;
+    resultEl.innerHTML = `
+      <div class="explain-loading">
+        <div class="explain-spinner"></div>
+        <p>${t('schedule_generating')}</p>
+      </div>`;
+
+    try{
+      const response = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks, availability, lang: currentLang })
+      });
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.error || 'schedule_failed');
+      renderSchedule(data.schedule);
+    } catch(err){
+      console.error(err);
+      resultEl.innerHTML = '';
+      errEl.textContent = t('schedule_error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderSchedule(days){
+    const resultEl = document.getElementById('scheduleResult');
+    if(!Array.isArray(days) || !days.length){
+      resultEl.innerHTML = '';
+      document.getElementById('scheduleError').textContent = t('schedule_error');
+      return;
+    }
+    resultEl.innerHTML = `<div class="schedule-grid">${days.map(day => `
+      <div class="schedule-day">
+        <h3>${escapeHtml(day.day || '')}</h3>
+        ${(day.blocks && day.blocks.length) ? day.blocks.map(b => `
+          <div class="schedule-block">
+            <span class="schedule-time">${escapeHtml(b.time || '')}</span>
+            <span class="schedule-activity">${escapeHtml(b.activity || '')}</span>
+          </div>`).join('') : `<div class="schedule-empty-day">${t('schedule_day_empty')}</div>`}
+      </div>`).join('')}</div>`;
+  }
+
+  function toggleExport(btn){
+    document.querySelectorAll('.export-menu.open').forEach(m=>{ if(m!==btn.nextElementSibling) m.classList.remove('open'); });
+    btn.nextElementSibling.classList.toggle('open');
+  }
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.export-wrap')){
+      document.querySelectorAll('.export-menu.open').forEach(m=>m.classList.remove('open'));
+    }
+  });
+
+  // ---------- view switching ----------
+  function switchView(view){
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-chat').classList.remove('active');
+    if(view==='chat'){
+      document.getElementById('view-chat').classList.add('active');
+    } else {
+      const target = document.getElementById('view-'+view);
+      if(target) target.classList.add('active');
+    }
+    if(view==='config') renderAdminPanel();
+  }
+
+  function renderAdminPanel(){
+    const wrap = document.getElementById('adminPanel');
+    if(!wrap) return;
+    if(isAdmin){
+      wrap.innerHTML = `
+        <div class="material-row" style="align-items:center;">
+          <div class="content-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 2 8.5 12 15l10-6.5L12 2z"/><path d="M2 15.5 12 22l10-6.5M2 12l10 6.5L22 12"/></svg></div>
+          <div class="content-main">
+            <div class="content-title">${t('admin_active_title')}</div>
+            <div style="color:var(--text-muted);font-size:13px;">${t('admin_active_desc')}</div>
+          </div>
+          <button class="btn btn-outline" onclick="deactivateAdmin()">${t('admin_deactivate_cta')}</button>
+        </div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="material-row" style="align-items:center;">
+        <div class="content-main">
+          <div class="content-title">${t('admin_inactive_title')}</div>
+          <div style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">${t('admin_inactive_desc')}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input type="password" id="adminCodeInput" placeholder="${t('admin_code_ph')}" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:13.5px;flex:1;min-width:180px;">
+            <button class="btn btn-primary" onclick="submitAdminCode()">${t('admin_activate_cta')}</button>
+          </div>
+          <div id="adminCodeError" style="color:#ff9b9b;font-size:12.5px;margin-top:8px;"></div>
+        </div>
+      </div>`;
+  }
+
+  async function submitAdminCode(){
+    const input = document.getElementById('adminCodeInput');
+    const errEl = document.getElementById('adminCodeError');
+    const ok = await activateAdmin(input.value.trim());
+    if(ok){
+      renderAdminPanel();
+    } else {
+      errEl.textContent = t('admin_code_wrong');
+    }
+  }
+  document.querySelectorAll('.nav-item').forEach(btn=>{
+    btn.addEventListener('click', ()=>switchView(btn.dataset.view));
+  });
+
+  // ---------- chat (calls Anthropic API) ----------
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  let history = [];
+
+  chatInput.addEventListener('input', ()=>{
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  });
+  chatInput.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+  sendBtn.addEventListener('click', sendMessage);
+
+  function addMessage(role, text){
+    const div = document.createElement('div');
+    div.className = 'msg ' + (role==='user' ? 'msg-user' : 'msg-ai');
+    div.innerHTML = `<div class="msg-label">${role==='user' ? (currentLang==='pt'?'Você':'You') : 'Studycast AI'}</div><div class="msg-bubble"></div>`;
+    div.querySelector('.msg-bubble').textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
+  }
+
+  function addTypingIndicator(){
+    const div = document.createElement('div');
+    div.className = 'msg msg-ai';
+    div.id = 'typingIndicator';
+    div.innerHTML = `<div class="msg-label">Studycast AI</div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  function removeTypingIndicator(){
+    const el = document.getElementById('typingIndicator');
+    if(el) el.remove();
+  }
+
+  async function sendMessage(){
+    const text = chatInput.value.trim();
+    if(!text) return;
+
+    if(!isAdmin && userPlan==='free' && chatCountToday >= FREE_CHAT_LIMIT){
+      addMessage('ai', t('chat_limit_msg'));
+      openUpgrade('plus');
+      return;
+    }
+
+    addMessage('user', text);
+    history.push({role:'user', content: text});
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    sendBtn.disabled = true;
+    addTypingIndicator();
+    chatCountToday++;
+
+    try{
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history, lang: currentLang })
+      });
+      const data = await response.json();
+      removeTypingIndicator();
+      if(!response.ok) throw new Error(data.error || 'chat_failed');
+      const reply = data.reply || "…";
+      addMessage('ai', reply);
+      history.push({role:'assistant', content: reply});
+    } catch(err){
+      removeTypingIndicator();
+      addMessage('ai', t('chat_error'));
+      console.error(err);
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  function showToast(text){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = text;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2600);
+  }
+
+  // ---------- upgrade modal (mostra Estudante e Premium lado a lado) ----------
+  const upgradeCopy = {
+    pt:{
+      plus:{ title:'Desbloqueie o Studycast Estudante', sub:'Materiais, chat e explicação completa com muito mais liberdade, por um preço justo.',
+        features:['Materiais ilimitados por mês','Chat com IA 24/7 sem limite diário','Explicação completa ilimitada','Até 5 horas de áudio por mês','Exportação em PDF e Word'],
+        cta:'Assinar Estudante' },
+      premium:{ title:'Desbloqueie o Studycast Premium', sub:'Tudo do Estudante, mais exportação completa e prioridade, para quem estuda todos os dias.',
+        features:['Tudo do plano Estudante','Exportação em todos os formatos','Processamento e suporte prioritários','Histórico de estudos ilimitado'],
+        cta:'Assinar Premium' },
+      month:'mês'
+    },
+    en:{
+      plus:{ title:'Unlock Studycast Student', sub:'Materials, chat and full explanation with a lot more freedom, at a fair price.',
+        features:['Unlimited materials per month','24/7 AI chat with no daily limit','Unlimited full explanations','Up to 5 hours of audio per month','Export to PDF and Word'],
+        cta:'Subscribe to Student' },
+      premium:{ title:'Unlock Studycast Premium', sub:'Everything in Student, plus full export and priority, for people who study every day.',
+        features:['Everything in the Student plan','Export to all formats','Priority processing and support','Unlimited study history'],
+        cta:'Subscribe to Premium' },
+      month:'month'
+    }
+  };
+  function renderUpgradeFeatures(elId, tier){
+    const copy = upgradeCopy[currentLang][tier];
+    document.getElementById(elId).innerHTML = copy.features.map(f=>
+      `<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span>${f}</span></li>`
+    ).join('');
+  }
+
+  function openUpgrade(){
+    renderUpgradeFeatures('upgradeFeaturesPlus', 'plus');
+    renderUpgradeFeatures('upgradeFeaturesPremium', 'premium');
+    document.getElementById('upgradeOverlay').classList.add('open');
+  }
+  function closeUpgrade(){ document.getElementById('upgradeOverlay').classList.remove('open'); }
+
+  function confirmActivatePlan(tier){
+    userPlan = (tier === 'premium') ? 'premium' : 'plus';
+    persistPlan(userPlan);
+    updatePlanLabels();
+    fetchAudioUsage();
+    closeUpgrade();
+    showToast(t(userPlan === 'premium' ? 'toast_upgraded_premium' : 'toast_upgraded_plus'));
+    refreshLists();
+    if(currentItem){
+      renderModalTabs();
+      switchModalTab(document.querySelector('.modal-tab.active')?.dataset.tab || tabsForItem(currentItem)[0]);
+    }
+  }
+
+  // ---------- content viewer modal ----------
+  let currentItem = null;
+  let flashIndex = 0;
+  let flashFlipped = false;
+
+  function tabsForItem(item){
+    return [...item.types, 'Explicação'];
+  }
+
+  function renderModalTabs(){
+    const tabsWrap = document.getElementById('modalTabs');
+    const active = document.querySelector('.modal-tab.active')?.dataset.tab;
+    tabsWrap.innerHTML = tabsForItem(currentItem).map((tp,i)=>{
+      const isActive = active ? active===tp : i===0;
+      const label = tp==='Explicação' ? (currentLang==='pt' ? 'Explicação' : 'Explanation') : tp;
+      const locked = (tp === 'Áudio' && isAudioBlocked()) || (tp === 'Explicação' && isExplainLocked());
+      return `<button class="modal-tab ${isActive?'active':''}" data-tab="${tp}" onclick="switchModalTab('${tp}')">${label}${locked?`<span class="lock-ico" style="margin-left:5px;opacity:.7;">${lockIcon}</span>`:''}</button>`;
+    }).join('');
+  }
+
+  function openModal(id){
+    currentItem = contentData.find(c => c.id === id);
+    if(!currentItem) return;
+    stopAudio();
+
+    document.getElementById('modalTitle').textContent = currentItem.title;
+    document.getElementById('modalSub').textContent = currentItem.goal + ' · ' + currentItem.date;
+
+    renderModalTabs();
+    document.getElementById('paneResumo').innerHTML = currentItem.resumo.map(r=>`<li>${r}</li>`).join('');
+
+    flashIndex = 0; flashFlipped = false;
+    if(currentItem.flashcards && currentItem.flashcards.length) renderFlashcard();
+
+    document.getElementById('paneMindmap').innerHTML = buildMindmapSVG(currentItem.title, currentItem.mindmap);
+
+    switchModalTab(tabsForItem(currentItem)[0]);
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('open');
+    stopAudio();
+  }
+
+  function switchModalTab(tab){
+    document.querySelectorAll('.modal-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+    document.querySelectorAll('.modal-pane').forEach(p=>p.classList.toggle('active', p.dataset.pane===tab));
+    if(tab !== 'Áudio') stopAudio();
+    if(tab === 'Áudio'){ fetchAudioUsage().then(renderAudioPane); renderAudioPane(); }
+    if(tab === 'Explicação') renderExplainPane();
+  }
+
+  function renderFlashcard(){
+    const card = currentItem.flashcards[flashIndex];
+    document.getElementById('flashFront').textContent = card.q;
+    document.getElementById('flashBack').textContent = card.a;
+    document.getElementById('flashCounter').textContent = (flashIndex+1) + ' / ' + currentItem.flashcards.length;
+    document.getElementById('flashcardEl').classList.remove('flipped');
+    flashFlipped = false;
+  }
+  function flipFlashcard(){
+    flashFlipped = !flashFlipped;
+    document.getElementById('flashcardEl').classList.toggle('flipped', flashFlipped);
+  }
+  function navFlashcard(dir){
+    const len = currentItem.flashcards.length;
+    flashIndex = (flashIndex + dir + len) % len;
+    renderFlashcard();
+  }
+
+  function buildMindmapSVG(title, branches){
+    const w = 640, h = 380, cx = w/2, cy = h/2;
+    const R = 155;
+    const n = branches.length;
+    let svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+
+    const positions = branches.map((label,i)=>{
+      const angle = (Math.PI*2 * i / n) - Math.PI/2;
+      const x = cx + R*Math.cos(angle);
+      const y = cy + R*Math.sin(angle);
+      return {x,y,label};
+    });
+
+    positions.forEach(p=>{
+      svg += `<line class="mm-line" x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}"/>`;
+    });
+
+    const centerW = Math.min(220, Math.max(120, title.length*6));
+    svg += `<g class="mm-node-center"><rect x="${cx-centerW/2}" y="${cy-24}" width="${centerW}" height="48" rx="12"/>
+      <text x="${cx}" y="${cy+5}" text-anchor="middle" class="mm-label-center">${truncate(title,26)}</text></g>`;
+
+    positions.forEach(p=>{
+      const bw = Math.min(150, Math.max(90, p.label.length*7));
+      svg += `<g class="mm-node"><rect x="${p.x-bw/2}" y="${p.y-18}" width="${bw}" height="36" rx="10"/>
+        <text x="${p.x}" y="${p.y+5}" text-anchor="middle" class="mm-label">${truncate(p.label,20)}</text></g>`;
+    });
+
+    svg += `</svg>`;
+    return svg;
+  }
+  function truncate(s,n){ return s.length>n ? s.slice(0,n-1)+'…' : s; }
+
+  // ---- audio pane (liberado em todos os planos, com cota mensal real em minutos) ----
+  let speaking = false;
+
+  async function fetchAudioUsage(){
+    try{
+      const res = await fetch('/api/tts/usage');
+      if(!res.ok) return;
+      audioUsage = await res.json();
+    } catch(err){
+      console.error('nao consegui carregar a cota de audio:', err);
+    }
+  }
+
+  function renderAudioPane(){
+    const wrap = document.getElementById('audioPaneWrap');
+
+    if(isAudioBlocked()){
+      const isFree = userPlan === 'free';
+      wrap.innerHTML = `
+        <div class="locked-pane">
+          <div class="locked-icon">${lockIcon}</div>
+          <span class="premium-pill">${currentLang==='pt' ? 'limite mensal atingido' : 'monthly limit reached'}</span>
+          <h3>${t('audio_limit_title')}</h3>
+          <p>${isFree ? t('audio_limit_desc_free') : t('audio_limit_desc_paid')}</p>
+          ${isFree ? `<button class="btn btn-primary" onclick="openUpgrade('plus')">${t('audio_limit_cta')}</button>` : ''}
+        </div>`;
+      return;
+    }
+
+    const u = audioUsage;
+    const usageLine = (u && !isAdmin)
+      ? `<strong>${u.minutesUsed}</strong>/${u.minutesLimit} ${t('audio_usage_minutes')}`
+      : t('audio_usage_unlimited');
+    const usagePct = (u && !isAdmin) ? Math.min(100, u.percent) : 0;
+
+    wrap.innerHTML = `
+      <div class="audio-player">
+        <button class="audio-play-btn" id="audioPlayBtn" onclick="toggleAudio()">
+          <svg id="audioIconPlay" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="audioIconPause" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display:none;"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+        </button>
+        <div class="waveform" id="waveform"></div>
+        <div class="audio-status" id="audioStatus">${t('audio_play_hint')} <span class="mono">${t('audio_play_action')}</span> ${t('audio_play_suffix')}</div>
+        <div class="audio-usage">${usageLine}</div>
+        ${(u && !isAdmin) ? `<div class="usage-track" style="width:180px;"><div class="usage-fill" style="width:${usagePct}%;"></div></div>` : ''}
+        <audio id="audioEl" style="display:none;"></audio>
+      </div>`;
+    const waveformEl = document.getElementById('waveform');
+    for(let i=0;i<28;i++) waveformEl.appendChild(document.createElement('span'));
+    speaking = false;
+  }
+
+  // le a Explicação completa em voz alta (gerando ela primeiro, se ainda nao existir).
+  // Toca so com a voz neural do servidor (Edge-TTS), sem fallback pra leitura
+  // robotizada do navegador — se o servidor falhar (ou a cota acabar), mostra erro claro.
+  async function toggleAudio(){
+    if(speaking){ stopAudio(); return; }
+
+    const item = currentItem;
+    const statusEl = document.getElementById('audioStatus');
+    const audioEl = document.getElementById('audioEl');
+
+    speaking = true;
+    document.getElementById('audioIconPlay').style.display = 'none';
+    document.getElementById('audioIconPause').style.display = 'block';
+    document.getElementById('waveform').classList.add('playing');
+
+    try{
+      statusEl.textContent = t('audio_preparing_text');
+      const explanationHtml = await ensureExplanation(item);
+      const text = explanationHtml.replace(/<[^>]+>/g, ' ').trim();
+
+      statusEl.textContent = t('audio_generating');
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, lang: currentLang })
+      });
+
+      if(!response.ok){
+        const data = await response.json().catch(()=>({}));
+        await fetchAudioUsage();
+        const msgKey = {
+          quota_exceeded: userPlan==='free' ? 'audio_limit_desc_free' : 'audio_limit_desc_paid',
+          global_cap_reached: 'audio_global_cap',
+          rate_limited: 'audio_rate_limited',
+          document_too_large: 'audio_too_large'
+        }[data.error] || 'audio_error';
+        statusEl.textContent = t(msgKey);
+        if(data.error === 'quota_exceeded' || data.error === 'global_cap_reached') renderAudioPane();
+        stopAudio();
+        return;
+      }
+
+      const blob = await response.blob();
+      audioEl.src = URL.createObjectURL(blob);
+      audioEl.onended = stopAudio;
+      audioEl.onerror = stopAudio;
+      await audioEl.play();
+      fetchAudioUsage();
+      statusEl.innerHTML = `${t('audio_playing')} <span class="mono">${t('audio_play_action')}</span>${t('audio_playing_suffix')}`;
+    } catch(err){
+      console.error('tts falhou:', err);
+      statusEl.textContent = t('audio_error');
+      stopAudio();
+    }
+  }
+
+  function stopAudio(){
+    const audioEl = document.getElementById('audioEl');
+    if(audioEl){ audioEl.pause(); audioEl.src = ''; }
+    speaking = false;
+    const playIcon = document.getElementById('audioIconPlay');
+    const pauseIcon = document.getElementById('audioIconPause');
+    const wf = document.getElementById('waveform');
+    const statusEl = document.getElementById('audioStatus');
+    if(playIcon) playIcon.style.display = 'block';
+    if(pauseIcon) pauseIcon.style.display = 'none';
+    if(wf) wf.classList.remove('playing');
+    if(statusEl) statusEl.innerHTML = `${t('audio_play_hint')} <span class="mono">${t('audio_play_action')}</span> ${t('audio_play_suffix')}`;
+  }
+
+  // ---- explicação completa (real AI, on demand) ----
+  function renderExplainPane(){
+    const pane = document.getElementById('paneExplain');
+
+    if(isExplainLocked()){
+      pane.innerHTML = `
+        <div class="locked-pane">
+          <div class="locked-icon">${lockIcon}</div>
+          <span class="premium-pill">${currentLang==='pt' ? 'recurso premium' : 'premium feature'}</span>
+          <h3>${t('explain_locked_title')}</h3>
+          <p>${t('explain_locked_desc')}</p>
+          <button class="btn btn-primary" onclick="openUpgrade('plus')">${t('explain_locked_cta')}</button>
+        </div>`;
+      return;
+    }
+
+    if(currentItem.explanation){
+      pane.innerHTML = `<span class="explain-badge">✦ ${t('explain_badge')}</span><div class="explain-text">${currentItem.explanation}</div>`;
+      return;
+    }
+    pane.innerHTML = `
+      <div class="explain-loading">
+        <div class="explain-spinner"></div>
+        <p>${t('explain_loading')}</p>
+      </div>`;
+    const item = currentItem;
+    ensureExplanation(item)
+      .then(()=>{ if(currentItem === item) renderExplainPane(); })
+      .catch(err=>{
+        console.error(err);
+        if(currentItem === item){
+          pane.innerHTML = `<div class="explain-error">${t('explain_error')}</div>`;
+        }
+      });
+  }
+
+  // gera a explicação completa (se ainda não existir) e devolve o HTML pronto;
+  // usado tanto pela aba "Explicação" quanto pelo áudio, que le esse mesmo texto.
+  async function ensureExplanation(item){
+    if(item.explanation) return item.explanation;
+    try{
+      const response = await fetch(`/api/materials/${item.id}/explain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang: currentLang })
+      });
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.error || 'explain_failed');
+      const text = data.explanation || '';
+      item.explanation = (text || t('explain_error')).split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('');
+      return item.explanation;
+    } catch(err){
+      console.error(err);
+      throw err;
+    }
+  }
+
+  // ---------- auth (cada pessoa com sua propria conta) ----------
+  let currentUser = null;
+
+  async function initAuth(){
+    try{
+      const res = await fetch('/api/auth/me');
+      if(!res.ok){
+        window.location.href = 'login.html';
+        return false;
+      }
+      const data = await res.json();
+      currentUser = data.user;
+      userPlan = currentUser.plan;
+      isAdmin = !!currentUser.isAdmin;
+
+      const initials = currentUser.name.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+      document.getElementById('userAvatar').textContent = initials || '?';
+      document.getElementById('userNameLabel').textContent = currentUser.name;
+
+      return true;
+    } catch(err){
+      console.error('auth check falhou:', err);
+      window.location.href = 'login.html';
+      return false;
+    }
+  }
+
+  async function logout(){
+    try{ await fetch('/api/auth/logout', { method:'POST' }); } catch(err){}
+    window.location.href = 'login.html';
+  }
+
+  async function persistPlan(plan){
+    try{
+      await fetch('/api/auth/plan', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ plan })
+      });
+    } catch(err){
+      console.error('nao consegui salvar o plano:', err);
+    }
+  }
+
+  // ---------- init ----------
+  (async function init(){
+    const ok = await initAuth();
+    if(!ok) return;
+    await checkAdminFromUrl();
+    setLang(currentLang);
+    await fetchMaterials();
+    fetchStats();
+    fetchAudioUsage();
+  })();
+</script>
+
+</body>
+</html>

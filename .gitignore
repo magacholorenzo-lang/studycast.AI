@@ -1,0 +1,21 @@
+# dependencias (reinstala com "npm install")
+server/node_modules/
+
+# segredos - NUNCA sobe pro GitHub
+server/.env
+server/.env.*
+!server/.env.example
+
+# dados de usuarios reais e conteudo gerado (nao e codigo, e dado em producao)
+server/users.json
+server/materials.json
+server/feedback.json
+server/audios.json
+server/audio-usage-monthly.json
+server/tts-global-usage.json
+server/alerts.log
+server/audio-cache/
+
+# arquivos do sistema
+.DS_Store
+Thumbs.db

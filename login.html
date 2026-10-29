@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studycast AI — Entrar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0A0F2C;
+    --bg-secondary:#121A4A;
+    --bg-card:#151E56;
+    --purple:#7B5CFA;
+    --purple-light:#B69FFF;
+    --purple-glow:rgba(123,92,250,0.35);
+    --white:#FFFFFF;
+    --text-muted:#A8AFDB;
+    --text-dim:#6D74A8;
+    --border:rgba(182,159,255,0.14);
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg-base);color:var(--white);font-family:'Inter',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;position:relative;overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+    width:1100px;height:1100px;background:radial-gradient(circle, var(--purple-glow) 0%, transparent 65%);
+    z-index:0;pointer-events:none;opacity:0.55;
+  }
+  h1,h2{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-0.02em;}
+  a{color:inherit;text-decoration:none;}
+
+  .top-bar{position:absolute;top:24px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 32px;z-index:2;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;}
+  .logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, var(--purple), #4B3FD6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px var(--purple-glow);}
+  .logo-mark svg{width:15px;height:15px;}
+  .lang-switch{display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+  .lang-switch button{padding:6px 12px;border-radius:999px;color:var(--text-muted);font-weight:600;background:none;border:none;cursor:pointer;}
+  .lang-switch button.active{background:var(--purple);color:#fff;}
+
+  .auth-card{
+    position:relative;z-index:1;width:100%;max-width:400px;background:var(--bg-card);
+    border:1px solid var(--border);border-radius:20px;padding:36px;
+  }
+  .auth-head{text-align:center;margin-bottom:26px;}
+  .auth-head h1{font-size:22px;margin-bottom:6px;}
+  .auth-head p{color:var(--text-muted);font-size:13.5px;}
+
+  .auth-tabs{display:flex;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:24px;}
+  .auth-tab{flex:1;text-align:center;padding:9px 0;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--text-muted);cursor:pointer;background:none;border:none;font-family:inherit;}
+  .auth-tab.active{background:var(--purple);color:#fff;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:7px;}
+  .field input{
+    width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;
+    padding:11px 14px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;
+  }
+  .field input:focus{outline:none;border-color:var(--purple-light);}
+  .field input::placeholder{color:var(--text-dim);}
+
+  .btn{
+    width:100%;font-weight:600;font-size:14.5px;padding:13px 0;border-radius:10px;border:none;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(135deg, var(--purple), #6247E0);color:#fff;box-shadow:0 4px 16px var(--purple-glow);
+    margin-top:6px;transition:transform .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:disabled{opacity:.6;cursor:default;transform:none;}
+
+  .auth-error{color:#ff9b9b;font-size:13px;text-align:center;margin-top:14px;min-height:16px;}
+  .auth-switch{text-align:center;font-size:13px;color:var(--text-dim);margin-top:20px;}
+  .auth-switch a{color:var(--purple-light);font-weight:600;cursor:pointer;}
+
+  .form-pane{display:none;}
+  .form-pane.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-4 4-6 8-6s6 2 8 6c-2 4-4 6-8 6s-6-2-8-6z" stroke="white" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
+    </span>
+    Studycast AI
+  </a>
+  <div class="lang-switch">
+    <button id="langPtBtn" onclick="setLang('pt')">PT</button>
+    <button id="langEnBtn" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<div class="auth-card">
+  <div class="auth-head">
+    <h1 data-i18n="auth_title">Bem-vindo de volta</h1>
+    <p data-i18n="auth_subtitle">Entre ou crie sua conta gratuita pra continuar estudando.</p>
+  </div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab active" data-tab="login" onclick="switchTab('login')" data-i18n="tab_login">Entrar</button>
+    <button class="auth-tab" data-tab="signup" onclick="switchTab('signup')" data-i18n="tab_signup">Criar conta</button>
+  </div>
+
+  <form id="loginForm" class="form-pane active" onsubmit="return submitLogin(event)">
+    <div class="field">
+      <label data-i18n="field_email">E-mail</label>
+      <input type="email" id="loginEmail" required placeholder="voce@email.com">
+    </div>
+    <div class="field">
+      <label data-i18n="field_password">Senha</label>
+      <input type="password" id="loginPassword" required placeholder="••••••••">
+    </div>
+    <button type="submit" class="btn" id="loginBtn">
+      <span data-i18n="btn_login">Entrar</span>
+    </button>
+  </form>
+
+  <form id="signupForm" class="form-pane" onsubmit="return submitSignup(event)">
+    <div class="field">
+      <label data-i18n="field_name">Seu nome</label>
+      <input type="text" id="signupName" required placeholder="Como podemos te chamar?">
+    </div>
+    <div class="field">
+      <label data-i18n="field_email">E-mail</label>
+      <input type="email" id="signupEmail" required placeholder="voce@email.com">
+    </div>
+    <div class="field">
+      <label data-i18n="field_password">Senha</label>
+      <input type="password" id="signupPassword" required minlength="6" placeholder="mínimo 6 caracteres">
+    </div>
+    <button type="submit" class="btn" id="signupBtn">
+      <span data-i18n="btn_signup">Criar conta grátis</span>
+    </button>
+  </form>
+
+  <div class="auth-error" id="authError"></div>
+
+  <div class="auth-switch" id="switchHintLogin">
+    <span data-i18n="no_account">Ainda não tem conta?</span> <a onclick="switchTab('signup')" data-i18n="create_one">Criar uma agora</a>
+  </div>
+  <div class="auth-switch" id="switchHintSignup" style="display:none;">
+    <span data-i18n="have_account">Já tem conta?</span> <a onclick="switchTab('login')" data-i18n="login_now">Entrar</a>
+  </div>
+</div>
+
+<script>
+  const translations = {
+    pt:{
+      auth_title:"Bem-vindo de volta", auth_subtitle:"Entre ou crie sua conta gratuita pra continuar estudando.",
+      tab_login:"Entrar", tab_signup:"Criar conta",
+      field_email:"E-mail", field_password:"Senha", field_name:"Seu nome",
+      btn_login:"Entrar", btn_signup:"Criar conta grátis",
+      no_account:"Ainda não tem conta?", create_one:"Criar uma agora",
+      have_account:"Já tem conta?", login_now:"Entrar",
+      err_missing:"Preencha todos os campos.", err_invalid:"E-mail ou senha incorretos.",
+      err_taken:"Esse e-mail já está cadastrado.", err_short:"A senha precisa ter pelo menos 6 caracteres.",
+      err_generic:"Algo deu errado. Tente novamente."
+    },
+    en:{
+      auth_title:"Welcome back", auth_subtitle:"Log in or create your free account to keep studying.",
+      tab_login:"Log in", tab_signup:"Sign up",
+      field_email:"Email", field_password:"Password", field_name:"Your name",
+      btn_login:"Log in", btn_signup:"Create free account",
+      no_account:"Don't have an account?", create_one:"Create one now",
+      have_account:"Already have an account?", login_now:"Log in",
+      err_missing:"Fill in all fields.", err_invalid:"Incorrect email or password.",
+      err_taken:"That email is already registered.", err_short:"Password must be at least 6 characters.",
+      err_generic:"Something went wrong. Please try again."
+    }
+  };
+  let currentLang = localStorage.getItem('scLang') || 'pt';
+
+  function t(key){ return translations[currentLang][key] || translations.pt[key] || key; }
+
+  function setLang(lang){
+    currentLang = lang;
+    localStorage.setItem('scLang', lang);
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('langPtBtn').classList.toggle('active', lang==='pt');
+    document.getElementById('langEnBtn').classList.toggle('active', lang==='en');
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if(translations[lang][key] !== undefined) el.textContent = translations[lang][key];
+    });
+  }
+  setLang(currentLang);
+
+  function switchTab(tab){
+    document.querySelectorAll('.auth-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+    document.getElementById('loginForm').classList.toggle('active', tab==='login');
+    document.getElementById('signupForm').classList.toggle('active', tab==='signup');
+    document.getElementById('switchHintLogin').style.display = tab==='login' ? 'none' : 'block';
+    document.getElementById('switchHintSignup').style.display = tab==='signup' ? 'none' : 'block';
+    document.getElementById('authError').textContent = '';
+  }
+
+  async function submitLogin(e){
+    e.preventDefault();
+    const errEl = document.getElementById('authError');
+    const btn = document.getElementById('loginBtn');
+    errEl.textContent = '';
+    btn.disabled = true;
+    try{
+      const res = await fetch('/api/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        errEl.textContent = data.error === 'invalid_credentials' ? t('err_invalid') : t('err_generic');
+        return false;
+      }
+      window.location.href = 'app.html';
+    } catch(err){
+      errEl.textContent = t('err_generic');
+    } finally {
+      btn.disabled = false;
+    }
+    return false;
+  }
+
+  async function submitSignup(e){
+    e.preventDefault();
+    const errEl = document.getElementById('authError');
+    const btn = document.getElementById('signupBtn');
+    errEl.textContent = '';
+    const password = document.getElementById('signupPassword').value;
+    if(password.length < 6){
+      errEl.textContent = t('err_short');
+      return false;
+    }
+    btn.disabled = true;
+    try{
+      const res = await fetch('/api/auth/signup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          name: document.getElementById('signupName').value,
+          email: document.getElementById('signupEmail').value,
+          password
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        errEl.textContent = data.error === 'email_taken' ? t('err_taken')
+          : data.error === 'password_too_short' ? t('err_short')
+          : data.error === 'missing_fields' ? t('err_missing')
+          : t('err_generic');
+        return false;
+      }
+      window.location.href = 'app.html';
+    } catch(err){
+      errEl.textContent = t('err_generic');
+    } finally {
+      btn.disabled = false;
+    }
+    return false;
+  }
+</script>
+
+</body>
+</html>
