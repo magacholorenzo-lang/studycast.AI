@@ -9,6 +9,7 @@ const multer = require('multer');
 const { PDFParse } = require('pdf-parse');
 const mammoth = require('mammoth');
 const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(express.json());
@@ -20,30 +21,70 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, '..')));
 
-// ---------- autenticacao (cadastro/login de usuarios) ----------
-const USERS_FILE = path.join(__dirname, 'users.json');
+// ---------- banco de dados (Supabase/Postgres) — usuarios, materiais, quizzes e feedback ----------
+// so persiste aqui o que nao pode se perder (contas, materiais, provas). O cache de audio e os
+// contadores de cota de TTS continuam em arquivo local: perder isso so custa regenerar audio,
+// nao e grave como perder a conta ou o material de alguem.
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-function readUsers() {
-  try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-  } catch {
-    return [];
-  }
+function rowToUser(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    passwordHash: row.password_hash,
+    plan: row.plan,
+    studyMinutes: row.study_minutes || 0,
+    isAdmin: !!row.is_admin,
+    createdAt: row.created_at
+  };
 }
-function writeUsers(list) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(list, null, 2));
+function userToRow(u) {
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    password_hash: u.passwordHash,
+    plan: u.plan,
+    study_minutes: u.studyMinutes || 0,
+    is_admin: !!u.isAdmin,
+    created_at: u.createdAt
+  };
+}
+async function findUserById(id) {
+  if (!id) return null;
+  const { data, error } = await supabase.from('users').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return rowToUser(data);
+}
+async function findUserByEmail(email) {
+  const { data, error } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+  if (error) throw error;
+  return rowToUser(data);
+}
+async function insertUser(user) {
+  const { data, error } = await supabase.from('users').insert(userToRow(user)).select().single();
+  if (error) throw error;
+  return rowToUser(data);
+}
+async function updateUser(id, fields) {
+  const row = {};
+  if ('plan' in fields) row.plan = fields.plan;
+  if ('isAdmin' in fields) row.is_admin = fields.isAdmin;
+  if ('studyMinutes' in fields) row.study_minutes = fields.studyMinutes;
+  const { error } = await supabase.from('users').update(row).eq('id', id);
+  if (error) throw error;
 }
 function publicUser(u) {
   return { id: u.id, name: u.name, email: u.email, plan: u.plan, studyMinutes: u.studyMinutes || 0, isAdmin: !!u.isAdmin };
 }
 
 // soma minutos de estudo "de verdade" toda vez que a pessoa usa algo (chat, explicacao, audio, material novo)
-function addStudyMinutes(userId, minutes) {
-  const users = readUsers();
-  const user = users.find(u => u.id === userId);
+async function addStudyMinutes(userId, minutes) {
+  const user = await findUserById(userId);
   if (!user) return;
-  user.studyMinutes = (user.studyMinutes || 0) + minutes;
-  writeUsers(users);
+  await updateUser(userId, { studyMinutes: (user.studyMinutes || 0) + minutes });
 }
 
 app.post('/api/auth/signup', async (req, res) => {
@@ -55,118 +96,122 @@ app.post('/api/auth/signup', async (req, res) => {
     return res.status(400).json({ error: 'password_too_short' });
   }
   const normalizedEmail = email.trim().toLowerCase();
-  const users = readUsers();
-  if (users.some(u => u.email === normalizedEmail)) {
-    return res.status(409).json({ error: 'email_taken' });
+  try {
+    if (await findUserByEmail(normalizedEmail)) {
+      return res.status(409).json({ error: 'email_taken' });
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await insertUser({
+      id: Date.now(),
+      name: name.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      plan: 'free',
+      studyMinutes: 0,
+      isAdmin: false,
+      createdAt: new Date().toISOString()
+    });
+    req.session.userId = user.id;
+    res.json({ user: publicUser(user) });
+  } catch (err) {
+    console.error('signup error:', err.message);
+    res.status(500).json({ error: 'signup_failed' });
   }
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = {
-    id: Date.now(),
-    name: name.trim(),
-    email: normalizedEmail,
-    passwordHash,
-    plan: 'free',
-    studyMinutes: 0,
-    createdAt: new Date().toISOString()
-  };
-  users.push(user);
-  writeUsers(users);
-  req.session.userId = user.id;
-  res.json({ user: publicUser(user) });
 });
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   const normalizedEmail = (email || '').trim().toLowerCase();
-  const users = readUsers();
-  const user = users.find(u => u.email === normalizedEmail);
-  if (!user || !(await bcrypt.compare(password || '', user.passwordHash))) {
-    return res.status(401).json({ error: 'invalid_credentials' });
+  try {
+    const user = await findUserByEmail(normalizedEmail);
+    if (!user || !(await bcrypt.compare(password || '', user.passwordHash))) {
+      return res.status(401).json({ error: 'invalid_credentials' });
+    }
+    req.session.userId = user.id;
+    res.json({ user: publicUser(user) });
+  } catch (err) {
+    console.error('login error:', err.message);
+    res.status(500).json({ error: 'login_failed' });
   }
-  req.session.userId = user.id;
-  res.json({ user: publicUser(user) });
 });
 
 app.post('/api/auth/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.get('/api/auth/me', (req, res) => {
-  const users = readUsers();
-  const user = users.find(u => u.id === req.session.userId);
+app.get('/api/auth/me', async (req, res) => {
+  const user = await findUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'not_authenticated' });
   res.json({ user: publicUser(user) });
 });
 
 // codigo de administrador validado so aqui no servidor (nunca exposto no JS do navegador)
-app.post('/api/auth/admin', (req, res) => {
-  const users = readUsers();
-  const user = users.find(u => u.id === req.session.userId);
+app.post('/api/auth/admin', async (req, res) => {
+  const user = await findUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'not_authenticated' });
   const { code } = req.body;
   if (!process.env.ADMIN_CODE || code !== process.env.ADMIN_CODE) {
     return res.status(403).json({ error: 'wrong_code' });
   }
-  user.isAdmin = true;
-  writeUsers(users);
-  res.json({ user: publicUser(user) });
+  await updateUser(user.id, { isAdmin: true });
+  res.json({ user: publicUser({ ...user, isAdmin: true }) });
 });
-app.post('/api/auth/admin/deactivate', (req, res) => {
-  const users = readUsers();
-  const user = users.find(u => u.id === req.session.userId);
+app.post('/api/auth/admin/deactivate', async (req, res) => {
+  const user = await findUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'not_authenticated' });
-  user.isAdmin = false;
-  writeUsers(users);
-  res.json({ user: publicUser(user) });
+  await updateUser(user.id, { isAdmin: false });
+  res.json({ user: publicUser({ ...user, isAdmin: false }) });
 });
 
-app.post('/api/auth/plan', (req, res) => {
-  const users = readUsers();
-  const user = users.find(u => u.id === req.session.userId);
+app.post('/api/auth/plan', async (req, res) => {
+  const user = await findUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'not_authenticated' });
   const { plan } = req.body;
   if (!['free', 'plus', 'premium'].includes(plan)) {
     return res.status(400).json({ error: 'invalid_plan' });
   }
-  user.plan = plan;
-  writeUsers(users);
-  res.json({ user: publicUser(user) });
+  await updateUser(user.id, { plan });
+  res.json({ user: publicUser({ ...user, plan }) });
 });
 
-const FEEDBACK_FILE = path.join(__dirname, 'feedback.json');
-
-function readFeedback() {
-  try {
-    return JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
-  } catch {
-    return [];
-  }
+async function getAllFeedback() {
+  const { data, error } = await supabase.from('feedback').select('*').order('date', { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
-function writeFeedback(list) {
-  fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(list, null, 2));
+async function insertFeedback(entry) {
+  const { error } = await supabase.from('feedback').insert(entry);
+  if (error) throw error;
 }
 
-app.post('/api/feedback', (req, res) => {
+app.post('/api/feedback', async (req, res) => {
   const { name, rating, message, lang } = req.body;
   if (!message || !message.trim()) {
     return res.status(400).json({ error: 'message_required' });
   }
-  const entry = {
-    id: Date.now(),
-    name: (name || '').trim() || (lang === 'pt' ? 'Anônimo' : 'Anonymous'),
-    rating: Number(rating) || 0,
-    message: message.trim(),
-    date: new Date().toISOString()
-  };
-  const list = readFeedback();
-  list.unshift(entry);
-  writeFeedback(list);
-  res.json({ ok: true });
+  try {
+    await insertFeedback({
+      id: Date.now(),
+      name: (name || '').trim() || (lang === 'pt' ? 'Anônimo' : 'Anonymous'),
+      rating: Number(rating) || 0,
+      message: message.trim(),
+      date: new Date().toISOString()
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('feedback error:', err.message);
+    res.status(500).json({ error: 'feedback_failed' });
+  }
 });
 
 // visite http://localhost:3000/api/feedback no navegador pra ver tudo que foi enviado
-app.get('/api/feedback', (req, res) => {
-  res.json(readFeedback());
+app.get('/api/feedback', async (req, res) => {
+  try {
+    res.json(await getAllFeedback());
+  } catch (err) {
+    console.error('feedback list error:', err.message);
+    res.status(500).json({ error: 'feedback_list_failed' });
+  }
 });
 
 // ---------- processar PDF/DOCX/TXT enviados (extrai o texto de verdade) ----------
@@ -372,7 +417,7 @@ app.post('/api/chat', async (req, res) => {
       { name: 'openrouter', run: () => callOpenRouter(systemInstruction, openAiStyleMessages) },
       { name: 'cloudflare', run: () => callCloudflare(systemInstruction, openAiStyleMessages) }
     ], 'chat');
-    if (req.session.userId) addStudyMinutes(req.session.userId, 1);
+    if (req.session.userId) await addStudyMinutes(req.session.userId, 1);
     res.json({ reply: text, model });
   } catch (err) {
     console.error('chat error (todas as IAs falharam):', err.message);
@@ -424,31 +469,104 @@ function extractJsonObject(text) {
 }
 
 // ---------- materiais reais do usuario (upload -> resumo/flashcards/mapa mental de verdade) ----------
-const MATERIALS_FILE = path.join(__dirname, 'materials.json');
-
-function readMaterials() {
-  try {
-    return JSON.parse(fs.readFileSync(MATERIALS_FILE, 'utf8'));
-  } catch {
-    return [];
-  }
+function rowToMaterial(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    title: row.title,
+    type: row.type,
+    goal: row.goal,
+    date: row.date,
+    sourceText: row.source_text,
+    resumo: row.resumo || [],
+    flashcards: row.flashcards || [],
+    mindmap: row.mindmap || [],
+    explanation: row.explanation
+  };
 }
-function writeMaterials(list) {
-  fs.writeFileSync(MATERIALS_FILE, JSON.stringify(list, null, 2));
+function materialToRow(m) {
+  return {
+    id: m.id,
+    user_id: m.userId,
+    title: m.title,
+    type: m.type,
+    goal: m.goal,
+    date: m.date,
+    source_text: m.sourceText,
+    resumo: m.resumo || [],
+    flashcards: m.flashcards || [],
+    mindmap: m.mindmap || [],
+    explanation: m.explanation || null
+  };
+}
+async function getMaterialsByUser(userId) {
+  const { data, error } = await supabase.from('materials').select('*').eq('user_id', userId).order('id', { ascending: false });
+  if (error) throw error;
+  return (data || []).map(rowToMaterial);
+}
+async function getMaterialById(id) {
+  const { data, error } = await supabase.from('materials').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return rowToMaterial(data);
+}
+async function insertMaterial(material) {
+  const { data, error } = await supabase.from('materials').insert(materialToRow(material)).select().single();
+  if (error) throw error;
+  return rowToMaterial(data);
+}
+async function updateMaterialExplanation(id, explanation) {
+  const { error } = await supabase.from('materials').update({ explanation }).eq('id', id);
+  if (error) throw error;
 }
 
 // ---------- simulado (objetivo) e prova (descritiva) gerados a partir de um material ----------
-const QUIZZES_FILE = path.join(__dirname, 'quizzes.json');
-
-function readQuizzes() {
-  try {
-    return JSON.parse(fs.readFileSync(QUIZZES_FILE, 'utf8'));
-  } catch {
-    return [];
-  }
+function rowToQuiz(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    materialId: row.material_id,
+    materialTitle: row.material_title,
+    mode: row.mode,
+    difficulty: row.difficulty,
+    count: row.count,
+    questions: row.questions || [],
+    answers: row.answers,
+    results: row.results,
+    status: row.status,
+    date: row.date
+  };
 }
-function writeQuizzes(list) {
-  fs.writeFileSync(QUIZZES_FILE, JSON.stringify(list, null, 2));
+function quizToRow(q) {
+  return {
+    id: q.id,
+    user_id: q.userId,
+    material_id: q.materialId,
+    material_title: q.materialTitle,
+    mode: q.mode,
+    difficulty: q.difficulty,
+    count: q.count,
+    questions: q.questions || [],
+    answers: q.answers || null,
+    results: q.results || null,
+    status: q.status,
+    date: q.date
+  };
+}
+async function getQuizById(id) {
+  const { data, error } = await supabase.from('quizzes').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return rowToQuiz(data);
+}
+async function insertQuiz(quiz) {
+  const { data, error } = await supabase.from('quizzes').insert(quizToRow(quiz)).select().single();
+  if (error) throw error;
+  return rowToQuiz(data);
+}
+async function updateQuizResults(id, { answers, results, status }) {
+  const { error } = await supabase.from('quizzes').update({ answers, results, status }).eq('id', id);
+  if (error) throw error;
 }
 
 function isPlanLocked(user) {
@@ -462,9 +580,8 @@ const DIFFICULTY_LABEL = {
   en: { facil: 'easy', medio: 'medium', dificil: 'hard' }
 };
 
-function requireAuth(req, res) {
-  const users = readUsers();
-  const user = users.find(u => u.id === req.session.userId);
+async function requireAuth(req, res) {
+  const user = await findUserById(req.session.userId);
   if (!user) {
     res.status(401).json({ error: 'not_authenticated' });
     return null;
@@ -472,15 +589,19 @@ function requireAuth(req, res) {
   return user;
 }
 
-app.get('/api/materials', (req, res) => {
-  const user = requireAuth(req, res);
+app.get('/api/materials', async (req, res) => {
+  const user = await requireAuth(req, res);
   if (!user) return;
-  const mine = readMaterials().filter(m => m.userId === user.id).sort((a, b) => b.id - a.id);
-  res.json({ materials: mine });
+  try {
+    res.json({ materials: await getMaterialsByUser(user.id) });
+  } catch (err) {
+    console.error('materials list error:', err.message);
+    res.status(500).json({ error: 'materials_list_failed' });
+  }
 });
 
 app.post('/api/materials', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
 
   const { title, type, sourceText, goal, lang = 'pt' } = req.body;
@@ -506,7 +627,7 @@ app.post('/api/materials', async (req, res) => {
     ], 'criação de material');
     const generated = extractJsonObject(text);
 
-    const material = {
+    const material = await insertMaterial({
       id: Date.now(),
       userId: user.id,
       title: (generated.title && generated.title.trim()) || title,
@@ -518,11 +639,8 @@ app.post('/api/materials', async (req, res) => {
       flashcards: Array.isArray(generated.flashcards) ? generated.flashcards : [],
       mindmap: Array.isArray(generated.mindmap) ? generated.mindmap : [],
       explanation: null
-    };
-    const list = readMaterials();
-    list.push(material);
-    writeMaterials(list);
-    addStudyMinutes(user.id, 5);
+    });
+    await addStudyMinutes(user.id, 5);
 
     res.json({ material });
   } catch (err) {
@@ -532,13 +650,12 @@ app.post('/api/materials', async (req, res) => {
 });
 
 app.post('/api/materials/:id/explain', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
 
   const { lang = 'pt' } = req.body;
-  const list = readMaterials();
-  const material = list.find(m => m.id === Number(req.params.id) && m.userId === user.id);
-  if (!material) return res.status(404).json({ error: 'not_found' });
+  const material = await getMaterialById(Number(req.params.id));
+  if (!material || material.userId !== user.id) return res.status(404).json({ error: 'not_found' });
 
   if (material.explanation) {
     return res.json({ explanation: material.explanation });
@@ -559,9 +676,8 @@ app.post('/api/materials/:id/explain', async (req, res) => {
       { name: 'groq', run: () => callGroq(systemInstruction, [{ role: 'user', content: userPrompt }]) },
       { name: 'cloudflare', run: () => callCloudflare(systemInstruction, [{ role: 'user', content: userPrompt }]) }
     ], 'explicação de material');
-    material.explanation = text;
-    writeMaterials(list);
-    addStudyMinutes(user.id, 8);
+    await updateMaterialExplanation(material.id, text);
+    await addStudyMinutes(user.id, 8);
     res.json({ explanation: text });
   } catch (err) {
     console.error('material explain error:', err.message);
@@ -570,7 +686,7 @@ app.post('/api/materials/:id/explain', async (req, res) => {
 });
 
 app.post('/api/simulado', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
   if (isPlanLocked(user)) return res.status(403).json({ error: 'plan_locked' });
 
@@ -578,8 +694,8 @@ app.post('/api/simulado', async (req, res) => {
   if (!QUIZ_COUNTS.includes(Number(count)) || !QUIZ_DIFFICULTIES.includes(difficulty)) {
     return res.status(400).json({ error: 'invalid_params' });
   }
-  const material = readMaterials().find(m => m.id === Number(materialId) && m.userId === user.id);
-  if (!material) return res.status(404).json({ error: 'material_not_found' });
+  const material = await getMaterialById(Number(materialId));
+  if (!material || material.userId !== user.id) return res.status(404).json({ error: 'material_not_found' });
 
   const diffLabel = DIFFICULTY_LABEL[lang === 'en' ? 'en' : 'pt'][difficulty];
   const systemInstruction = lang === 'pt'
@@ -602,7 +718,7 @@ app.post('/api/simulado', async (req, res) => {
       .map(q => ({ q: q.q, options: q.options, correct: Math.min(3, Math.max(0, q.correct)) }));
     if (!questions.length) throw new Error('no_valid_questions');
 
-    const quiz = {
+    const quiz = await insertQuiz({
       id: Date.now(),
       userId: user.id,
       materialId: material.id,
@@ -614,10 +730,7 @@ app.post('/api/simulado', async (req, res) => {
       results: null,
       status: 'pending',
       date: new Date().toISOString()
-    };
-    const list = readQuizzes();
-    list.push(quiz);
-    writeQuizzes(list);
+    });
 
     res.json({ quiz: { id: quiz.id, materialTitle: quiz.materialTitle, mode: quiz.mode, difficulty, questions: questions.map(({ q, options }) => ({ q, options })) } });
   } catch (err) {
@@ -626,13 +739,12 @@ app.post('/api/simulado', async (req, res) => {
   }
 });
 
-app.post('/api/simulado/:id/submit', (req, res) => {
-  const user = requireAuth(req, res);
+app.post('/api/simulado/:id/submit', async (req, res) => {
+  const user = await requireAuth(req, res);
   if (!user) return;
 
-  const list = readQuizzes();
-  const quiz = list.find(q => q.id === Number(req.params.id) && q.userId === user.id && q.mode === 'simulado');
-  if (!quiz) return res.status(404).json({ error: 'not_found' });
+  const quiz = await getQuizById(Number(req.params.id));
+  if (!quiz || quiz.userId !== user.id || quiz.mode !== 'simulado') return res.status(404).json({ error: 'not_found' });
 
   if (quiz.status === 'submitted') {
     return res.json({ results: quiz.results });
@@ -656,17 +768,14 @@ app.post('/api/simulado/:id/submit', (req, res) => {
     perQuestion
   };
 
-  quiz.answers = answers;
-  quiz.results = results;
-  quiz.status = 'submitted';
-  writeQuizzes(list);
-  addStudyMinutes(user.id, Math.round(quiz.questions.length * 0.5));
+  await updateQuizResults(quiz.id, { answers, results, status: 'submitted' });
+  await addStudyMinutes(user.id, Math.round(quiz.questions.length * 0.5));
 
   res.json({ results });
 });
 
 app.post('/api/prova', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
   if (isPlanLocked(user)) return res.status(403).json({ error: 'plan_locked' });
 
@@ -674,8 +783,8 @@ app.post('/api/prova', async (req, res) => {
   if (!QUIZ_COUNTS.includes(Number(count)) || !QUIZ_DIFFICULTIES.includes(difficulty)) {
     return res.status(400).json({ error: 'invalid_params' });
   }
-  const material = readMaterials().find(m => m.id === Number(materialId) && m.userId === user.id);
-  if (!material) return res.status(404).json({ error: 'material_not_found' });
+  const material = await getMaterialById(Number(materialId));
+  if (!material || material.userId !== user.id) return res.status(404).json({ error: 'material_not_found' });
 
   const diffLabel = DIFFICULTY_LABEL[lang === 'en' ? 'en' : 'pt'][difficulty];
   const systemInstruction = lang === 'pt'
@@ -698,7 +807,7 @@ app.post('/api/prova', async (req, res) => {
       .map(q => ({ q: q.q }));
     if (!questions.length) throw new Error('no_valid_questions');
 
-    const quiz = {
+    const quiz = await insertQuiz({
       id: Date.now(),
       userId: user.id,
       materialId: material.id,
@@ -710,10 +819,7 @@ app.post('/api/prova', async (req, res) => {
       results: null,
       status: 'pending',
       date: new Date().toISOString()
-    };
-    const list = readQuizzes();
-    list.push(quiz);
-    writeQuizzes(list);
+    });
 
     res.json({ quiz: { id: quiz.id, materialTitle: quiz.materialTitle, mode: quiz.mode, difficulty, questions } });
   } catch (err) {
@@ -723,12 +829,11 @@ app.post('/api/prova', async (req, res) => {
 });
 
 app.post('/api/prova/:id/submit', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
 
-  const list = readQuizzes();
-  const quiz = list.find(q => q.id === Number(req.params.id) && q.userId === user.id && q.mode === 'prova');
-  if (!quiz) return res.status(404).json({ error: 'not_found' });
+  const quiz = await getQuizById(Number(req.params.id));
+  if (!quiz || quiz.userId !== user.id || quiz.mode !== 'prova') return res.status(404).json({ error: 'not_found' });
 
   if (quiz.status === 'submitted') {
     return res.json({ results: quiz.results });
@@ -739,7 +844,7 @@ app.post('/api/prova/:id/submit', async (req, res) => {
     return res.status(400).json({ error: 'invalid_answers' });
   }
 
-  const material = readMaterials().find(m => m.id === quiz.materialId);
+  const material = await getMaterialById(quiz.materialId);
   const qaBlock = quiz.questions.map((q, i) => (lang === 'pt'
     ? `Questão ${i + 1}: ${q.q}\nResposta do aluno: ${answers[i]}`
     : `Question ${i + 1}: ${q.q}\nStudent's answer: ${answers[i]}`)).join('\n\n');
@@ -770,11 +875,8 @@ app.post('/api/prova/:id/submit', async (req, res) => {
       overallFeedback: graded.overallFeedback || ''
     };
 
-    quiz.answers = answers;
-    quiz.results = results;
-    quiz.status = 'submitted';
-    writeQuizzes(list);
-    addStudyMinutes(user.id, Math.round(quiz.questions.length * 1.5));
+    await updateQuizResults(quiz.id, { answers, results, status: 'submitted' });
+    await addStudyMinutes(user.id, Math.round(quiz.questions.length * 1.5));
 
     res.json({ results });
   } catch (err) {
@@ -783,24 +885,29 @@ app.post('/api/prova/:id/submit', async (req, res) => {
   }
 });
 
-app.get('/api/stats', (req, res) => {
-  const user = requireAuth(req, res);
+app.get('/api/stats', async (req, res) => {
+  const user = await requireAuth(req, res);
   if (!user) return;
-  const mine = readMaterials().filter(m => m.userId === user.id);
-  const contentGenerated = mine.reduce((sum, m) => {
-    let count = 0;
-    if (m.resumo && m.resumo.length) count++;
-    if (m.flashcards && m.flashcards.length) count++;
-    if (m.mindmap && m.mindmap.length) count++;
-    if (m.explanation) count++;
-    return sum + count;
-  }, 0);
-  res.json({
-    documentsCount: mine.length,
-    materialsProcessed: mine.length,
-    contentGenerated,
-    studyMinutes: user.studyMinutes || 0
-  });
+  try {
+    const mine = await getMaterialsByUser(user.id);
+    const contentGenerated = mine.reduce((sum, m) => {
+      let count = 0;
+      if (m.resumo && m.resumo.length) count++;
+      if (m.flashcards && m.flashcards.length) count++;
+      if (m.mindmap && m.mindmap.length) count++;
+      if (m.explanation) count++;
+      return sum + count;
+    }, 0);
+    res.json({
+      documentsCount: mine.length,
+      materialsProcessed: mine.length,
+      contentGenerated,
+      studyMinutes: user.studyMinutes || 0
+    });
+  } catch (err) {
+    console.error('stats error:', err.message);
+    res.status(500).json({ error: 'stats_failed' });
+  }
 });
 
 app.post('/api/schedule', async (req, res) => {
@@ -835,7 +942,8 @@ app.post('/api/schedule', async (req, res) => {
 // ================= TTS (audio) — geracao com cache, cota e trava de custo =================
 // Provedor: Edge-TTS (voz neural da Microsoft, gratuito, sem chave/cartao). O restante da
 // arquitetura (cache por hash, cota mensal por usuario, kill switch global, chunking,
-// rate limit) segue o briefing tecnico do audio.
+// rate limit) segue o briefing tecnico do audio. Fica em arquivo local de proposito: e so
+// cache/contador, perder isso no pior caso regenera audio, nao perde trabalho de ninguem.
 const TTS_VOICES = {
   pt: 'pt-BR-FranciscaNeural',
   en: 'en-US-JennyNeural'
@@ -911,7 +1019,7 @@ function alertFounder(message) {
   }
 }
 
-// rate limit por usuario (em memoria — reseta se o servidor reiniciar, o que aqui é aceitavel)
+// rate limit por usuario (em memoria — reseta se o servidor reiniciar, o que aqui e aceitavel)
 const ttsRequestLog = new Map();
 function isRateLimited(userId) {
   const hourAgo = Date.now() - 60 * 60 * 1000;
@@ -981,8 +1089,8 @@ async function synthesizeFull(text, voice) {
   return Buffer.concat(buffers);
 }
 
-app.get('/api/tts/usage', (req, res) => {
-  const user = requireAuth(req, res);
+app.get('/api/tts/usage', async (req, res) => {
+  const user = await requireAuth(req, res);
   if (!user) return;
   const limit = planCharLimit(user.plan);
   const used = getUserMonthlyChars(user.id);
@@ -997,7 +1105,7 @@ app.get('/api/tts/usage', (req, res) => {
 });
 
 app.post('/api/tts', async (req, res) => {
-  const user = requireAuth(req, res);
+  const user = await requireAuth(req, res);
   if (!user) return;
 
   const { text: rawText, lang = 'pt' } = req.body;
@@ -1069,7 +1177,7 @@ app.post('/api/tts', async (req, res) => {
 
     // minutos de estudo contam mesmo em cache hit — a pessoa esta ouvindo de verdade
     const minutes = Math.max(1, Math.round(buffer.length / 6000 / 60));
-    addStudyMinutes(user.id, minutes);
+    await addStudyMinutes(user.id, minutes);
 
     res.setHeader('Content-Type', 'audio/mpeg');
     res.end(buffer);

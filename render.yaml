@@ -17,6 +17,10 @@ services:
         sync: false
       - key: CLOUDFLARE_API_TOKEN
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
       - key: ADMIN_CODE
         sync: false
       - key: SESSION_SECRET
