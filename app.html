@@ -497,6 +497,10 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             <span data-i18n="upload_camera_btn">Tirar foto</span>
           </button>
+          <button class="btn btn-outline" onclick="handlePasteClick()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+            <span data-i18n="upload_paste_btn">Colar texto</span>
+          </button>
         </div>
         <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display:none">
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
@@ -663,6 +667,33 @@
   </div>
 </div>
 
+<!-- COLAR TEXTO MODAL -->
+<div class="modal-overlay" id="pasteTextOverlay" onclick="if(event.target===this) closePasteText()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <h2 data-i18n="paste_modal_title">Colar texto</h2>
+        <div class="modal-sub" data-i18n="paste_modal_sub">Cole o conteúdo que você quer transformar em material de estudo.</div>
+      </div>
+      <button class="modal-close" onclick="closePasteText()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="schedule-field">
+        <label data-i18n="paste_title_label">Título (opcional)</label>
+        <input type="text" id="pasteTextTitle" data-i18n-placeholder="paste_title_ph" placeholder="Ex: Resumo de Biologia" style="width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;">
+      </div>
+      <div class="schedule-field">
+        <label data-i18n="paste_text_label">Texto</label>
+        <textarea id="pasteTextArea" rows="10" data-i18n-placeholder="paste_text_ph" placeholder="Cole aqui o conteúdo que você quer estudar..."></textarea>
+      </div>
+      <div id="pasteTextError" class="schedule-error"></div>
+      <button class="btn btn-primary btn-block" onclick="submitPasteText()" data-i18n="paste_create_btn">Criar material</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8FE3A8" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
   <span id="toastText">Plano atualizado!</span>
@@ -688,7 +719,11 @@
       limit_reached:"limite do plano gratuito", limit_desc:"Você atingiu o limite de materiais do mês. Assine um plano pago para continuar enviando.", see_plans:"Ver planos",
       my_materials:"Meus materiais", my_materials_sub:"Envie um material novo ou acompanhe o processamento dos existentes.",
       upload_title2:"Arraste um arquivo ou clique para enviar", upload_sub2:"PDF, DOCX, TXT — ou tire uma foto de anotações e provas",
-      upload_file_btn:"Enviar arquivo", upload_camera_btn:"Tirar foto",
+      upload_file_btn:"Enviar arquivo", upload_camera_btn:"Tirar foto", upload_paste_btn:"Colar texto",
+      paste_modal_title:"Colar texto", paste_modal_sub:"Cole o conteúdo que você quer transformar em material de estudo.",
+      paste_title_label:"Título (opcional)", paste_title_ph:"Ex: Resumo de Biologia",
+      paste_text_label:"Texto", paste_text_ph:"Cole aqui o conteúdo que você quer estudar...",
+      paste_create_btn:"Criar material", paste_empty_error:"Cole algum texto antes de criar o material.",
       ocr_reading:"Lendo texto da imagem...", ocr_downloading:"Baixando leitor de texto (só na 1ª vez)...",
       ocr_done:"texto extraído · ver", ocr_empty:"nenhum texto encontrado", ocr_error:"não consegui ler a imagem",
       ocr_badge:"texto extraído por OCR gratuito",
@@ -766,7 +801,11 @@
       limit_reached:"free plan limit", limit_desc:"You've reached this month's material limit. Subscribe to a paid plan to keep uploading.", see_plans:"See plans",
       my_materials:"My materials", my_materials_sub:"Upload a new material or track the processing of existing ones.",
       upload_title2:"Drag a file or click to upload", upload_sub2:"PDF, DOCX, TXT — or take a photo of your notes and exams",
-      upload_file_btn:"Upload file", upload_camera_btn:"Take a photo",
+      upload_file_btn:"Upload file", upload_camera_btn:"Take a photo", upload_paste_btn:"Paste text",
+      paste_modal_title:"Paste text", paste_modal_sub:"Paste the content you want to turn into study material.",
+      paste_title_label:"Title (optional)", paste_title_ph:"e.g. Biology summary",
+      paste_text_label:"Text", paste_text_ph:"Paste the content you want to study here...",
+      paste_create_btn:"Create material", paste_empty_error:"Paste some text before creating the material.",
       ocr_reading:"Reading text from image...", ocr_downloading:"Downloading text reader (first time only)...",
       ocr_done:"text extracted · view", ocr_empty:"no text found", ocr_error:"couldn't read the image",
       ocr_badge:"text extracted by free OCR",
@@ -1087,6 +1126,46 @@
   function handleCameraClick(){
     if(!isAdmin && userPlan==='free' && contentData.length >= FREE_MATERIAL_LIMIT){ openUpgrade('plus'); return; }
     document.getElementById('cameraInput').click();
+  }
+
+  function handlePasteClick(){
+    if(!isAdmin && userPlan==='free' && contentData.length >= FREE_MATERIAL_LIMIT){ openUpgrade('plus'); return; }
+    document.getElementById('pasteTextTitle').value = '';
+    document.getElementById('pasteTextArea').value = '';
+    document.getElementById('pasteTextError').textContent = '';
+    document.getElementById('pasteTextOverlay').classList.add('open');
+  }
+
+  function closePasteText(){
+    document.getElementById('pasteTextOverlay').classList.remove('open');
+  }
+
+  function submitPasteText(){
+    const text = document.getElementById('pasteTextArea').value.trim();
+    if(!text){
+      document.getElementById('pasteTextError').textContent = t('paste_empty_error');
+      return;
+    }
+    const titleInput = document.getElementById('pasteTextTitle').value.trim();
+    const label = currentLang==='pt' ? 'Texto colado' : 'Pasted text';
+    const name = titleInput || `${label} — ${new Date().toLocaleDateString(currentLang==='pt' ? 'pt-BR' : 'en-US')}`;
+    closePasteText();
+    const row = addMaterialRow(name, null);
+    const rowId = 'paste' + (materialRowSeq++);
+    row.dataset.ocrId = rowId;
+    extractedText[rowId] = text;
+    const fill = row.querySelector('.progress-fill');
+    const pill = row.querySelector('.status-pill');
+    fill.style.width = '100%';
+    pill.textContent = t('ocr_done');
+    pill.classList.remove('status-processing');
+    pill.classList.add('status-done', 'clickable');
+    pill.onclick = ()=> toggleOcrText(row, rowId);
+    const box = document.createElement('div');
+    box.className = 'ocr-text';
+    box.innerHTML = `<span class="ocr-badge">${t('file_badge')}</span>${escapeHtml(text.slice(0,4000))}`;
+    row.querySelector('.content-main').appendChild(box);
+    generateMaterialFromRow(row, name, 'TXT', text);
   }
 
   // stores extracted text per material row (from OCR photos or parsed PDF/DOCX/TXT),
