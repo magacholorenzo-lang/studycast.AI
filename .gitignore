@@ -13,6 +13,7 @@ server/feedback.json
 server/audios.json
 server/audio-usage-monthly.json
 server/tts-global-usage.json
+server/quizzes.json
 server/alerts.log
 server/audio-cache/
 

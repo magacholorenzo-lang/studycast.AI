@@ -202,6 +202,30 @@
   .schedule-activity{font-size:13.5px;color:var(--white);}
   .schedule-empty-day{font-size:12.5px;color:var(--text-dim);}
 
+  /* ---------- SIMULADO / PROVA ---------- */
+  .quiz-field{margin-bottom:18px;}
+  .quiz-field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px;}
+  .quiz-field-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .quiz-field-row .quiz-field{flex:1;min-width:160px;}
+  .quiz-empty-materials{color:var(--text-muted);font-size:13.5px;background:var(--bg-secondary);border:1px dashed var(--border);border-radius:10px;padding:16px;}
+  .quiz-question-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:14px;}
+  .quiz-question-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple-light);margin-bottom:8px;}
+  .quiz-question-text{font-size:14.5px;color:var(--white);margin-bottom:16px;line-height:1.6;}
+  .quiz-options{display:flex;flex-direction:column;gap:8px;}
+  .quiz-option{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-secondary);cursor:pointer;font-size:13.5px;color:var(--text-muted);transition:all .15s ease;}
+  .quiz-option:hover{border-color:var(--purple-light);color:var(--white);}
+  .quiz-option.selected{border-color:var(--purple-light);background:rgba(123,92,250,.14);color:var(--white);}
+  .quiz-option.correct{border-color:var(--green);background:rgba(143,227,168,.14);color:var(--green);}
+  .quiz-option.incorrect{border-color:#ff9b9b;background:rgba(255,155,155,.1);color:#ff9b9b;}
+  .quiz-option input{accent-color:var(--purple-light);}
+  .quiz-answer-textarea{width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;}
+  .quiz-answer-textarea:focus{outline:none;border-color:var(--purple-light);}
+  .quiz-feedback{margin-top:14px;padding:14px 16px;border-radius:10px;background:var(--bg-secondary);border:1px solid var(--border);font-size:13px;color:var(--text-muted);line-height:1.6;}
+  .quiz-feedback .quiz-feedback-score{font-family:'JetBrains Mono',monospace;color:var(--purple-light);font-weight:600;margin-bottom:6px;display:block;}
+  .quiz-score-summary{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:22px;text-align:center;}
+  .quiz-score-summary .quiz-score-big{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;color:var(--purple-light);}
+  .quiz-score-summary .quiz-score-label{font-size:13px;color:var(--text-muted);margin-top:4px;}
+
   /* ---------- CHAT VIEW ---------- */
   .chat-view{display:none;flex-direction:column;height:100%;}
   .chat-view.active{display:flex;}
@@ -354,6 +378,14 @@
       <button class="nav-item" data-view="cronograma">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
         <span data-i18n="nav_schedule">Cronograma</span>
+      </button>
+      <button class="nav-item" data-view="simulado">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span data-i18n="nav_simulado">Simulado</span>
+      </button>
+      <button class="nav-item" data-view="prova">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 11h3"/></svg>
+        <span data-i18n="nav_prova">Prova</span>
       </button>
       <button class="nav-item" data-view="config">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.06.07a2.16 2.16 0 1 1-3.06 3.06l-.07-.06a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.1 1.65V21a2.16 2.16 0 1 1-4.32 0v-.1a1.8 1.8 0 0 0-1.18-1.65 1.8 1.8 0 0 0-1.98.36l-.06.06a2.16 2.16 0 1 1-3.06-3.06l.06-.07a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.1H3a2.16 2.16 0 1 1 0-4.32h.1a1.8 1.8 0 0 0 1.65-1.18 1.8 1.8 0 0 0-.36-1.98l-.06-.06a2.16 2.16 0 1 1 3.06-3.06l.07.06a1.8 1.8 0 0 0 1.98.36H9.6a1.8 1.8 0 0 0 1.1-1.65V3a2.16 2.16 0 1 1 4.32 0v.1a1.8 1.8 0 0 0 1.1 1.65 1.8 1.8 0 0 0 1.98-.36l.06-.06a2.16 2.16 0 1 1 3.06 3.06l-.06.07a1.8 1.8 0 0 0-.36 1.98V9.6a1.8 1.8 0 0 0 1.65 1.1H21a2.16 2.16 0 1 1 0 4.32h-.1a1.8 1.8 0 0 0-1.65 1.1z"/></svg>
@@ -540,6 +572,28 @@
       <div id="scheduleResult"></div>
     </section>
 
+    <!-- SIMULADO -->
+    <section class="view" id="view-simulado">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="simulado_title">Simulado</h1>
+          <p data-i18n="simulado_sub">Questões objetivas geradas a partir de um material seu, corrigidas na hora.</p>
+        </div>
+      </div>
+      <div id="simuladoBody"></div>
+    </section>
+
+    <!-- PROVA -->
+    <section class="view" id="view-prova">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="prova_title">Prova</h1>
+          <p data-i18n="prova_sub">Questões descritivas geradas a partir de um material seu, corrigidas pela IA com feedback.</p>
+        </div>
+      </div>
+      <div id="provaBody"></div>
+    </section>
+
     <!-- CONFIG -->
     <section class="view" id="view-config">
       <div class="view-header">
@@ -706,7 +760,7 @@
   // ---------- i18n ----------
   const translations = {
     pt:{
-      nav_dashboard:"Painel", nav_recent:"Conteúdo recente", nav_materials:"Meus materiais", nav_chat:"Chat com IA", nav_schedule:"Cronograma", nav_settings:"Configurações",
+      nav_dashboard:"Painel", nav_recent:"Conteúdo recente", nav_materials:"Meus materiais", nav_chat:"Chat com IA", nav_schedule:"Cronograma", nav_simulado:"Simulado", nav_prova:"Prova", nav_settings:"Configurações",
       objective_label:"O que você quer estudar?", hours_label:"Horas de estudo", hours_sub:"↑ 6h esta semana",
       usage_label:"Materiais este mês", plan_free_label:"Plano Gratuito", plan_plus_label:"Plano Estudante", plan_premium_label:"Plano Premium",
       obj_school:"Prova escolar", obj_personal:"Estudo pessoal", obj_exam:"Concurso público", obj_medical:"Residência médica",
@@ -753,6 +807,21 @@
       schedule_generate_cta:"Gerar cronograma", schedule_missing_fields:"Preencha os dois campos antes de gerar.",
       schedule_generating:"Montando seu cronograma da semana...",
       schedule_error:"Não consegui gerar o cronograma agora. Tente novamente em instantes.",
+      simulado_title:"Simulado", simulado_sub:"Questões objetivas geradas a partir de um material seu, corrigidas na hora.",
+      prova_title:"Prova", prova_sub:"Questões descritivas geradas a partir de um material seu, corrigidas pela IA com feedback.",
+      simulado_locked_title:"Simulados com correção automática",
+      simulado_locked_desc:"O simulado é um recurso dos planos pagos. Assine o Estudante pra gerar questões objetivas sobre qualquer material e corrigir na hora.",
+      prova_locked_title:"Provas descritivas corrigidas pela IA",
+      prova_locked_desc:"A prova é um recurso dos planos pagos. Assine o Estudante pra gerar questões descritivas e receber correção e feedback da IA.",
+      quiz_no_materials:"Envie um material em \"Meus materiais\" antes de gerar um simulado ou prova.",
+      quiz_material_label:"Material", quiz_count_label:"Número de questões", quiz_difficulty_label:"Dificuldade",
+      quiz_diff_easy:"Fácil", quiz_diff_medium:"Médio", quiz_diff_hard:"Difícil",
+      simulado_generate_cta:"Gerar simulado", prova_generate_cta:"Gerar prova",
+      simulado_generating:"Gerando as questões do simulado...", prova_generating:"Gerando as questões da prova...",
+      quiz_question_label:"Questão", simulado_submit_cta:"Corrigir simulado", prova_submit_cta:"Enviar para correção",
+      quiz_missing_answers:"Responda todas as questões antes de enviar.", quiz_error:"Algo deu errado. Tente novamente em instantes.",
+      quiz_score_label:"Nota", quiz_new_cta:"Fazer outro", prova_answer_ph:"Escreva sua resposta aqui...",
+      prova_grading:"A IA está corrigindo suas respostas...",
       schedule_day_empty:"Sem atividades nesse dia.",
       chat_title:"Chat com IA", chat_sub:"Disponível 24 horas por dia, 7 dias por semana. Pergunte qualquer coisa sobre o que você está estudando.",
       chat_greeting:"Oi, Maria! Sou seu assistente de estudos, disponível 24/7. Pode me perguntar sobre qualquer material que você enviou, pedir pra reexplicar um conceito, ou só tirar uma dúvida. O que você quer estudar hoje?",
@@ -788,7 +857,7 @@
       audio_usage_minutes:"min usados este mês", audio_usage_unlimited:"Áudio ilimitado (modo administrador)"
     },
     en:{
-      nav_dashboard:"Dashboard", nav_recent:"Recent content", nav_materials:"My materials", nav_chat:"AI chat", nav_schedule:"Schedule", nav_settings:"Settings",
+      nav_dashboard:"Dashboard", nav_recent:"Recent content", nav_materials:"My materials", nav_chat:"AI chat", nav_schedule:"Schedule", nav_simulado:"Practice test", nav_prova:"Exam", nav_settings:"Settings",
       objective_label:"What do you want to study?", hours_label:"Study hours", hours_sub:"↑ 6h this week",
       usage_label:"Materials this month", plan_free_label:"Free plan", plan_plus_label:"Student plan", plan_premium_label:"Premium plan",
       obj_school:"School exam", obj_personal:"Personal study", obj_exam:"Public exam", obj_medical:"Medical residency",
@@ -835,6 +904,21 @@
       schedule_generate_cta:"Generate schedule", schedule_missing_fields:"Fill in both fields before generating.",
       schedule_generating:"Building your weekly schedule...",
       schedule_error:"Couldn't generate the schedule right now. Please try again shortly.",
+      simulado_title:"Practice test", simulado_sub:"Multiple-choice questions generated from one of your materials, graded instantly.",
+      prova_title:"Exam", prova_sub:"Open-ended questions generated from one of your materials, graded by AI with feedback.",
+      simulado_locked_title:"Practice tests with instant grading",
+      simulado_locked_desc:"Practice tests are a paid-plan feature. Subscribe to Student to generate multiple-choice questions from any material and get graded instantly.",
+      prova_locked_title:"Open-ended exams graded by AI",
+      prova_locked_desc:"Exams are a paid-plan feature. Subscribe to Student to generate open-ended questions and get AI grading and feedback.",
+      quiz_no_materials:"Upload a material in \"My materials\" before generating a practice test or exam.",
+      quiz_material_label:"Material", quiz_count_label:"Number of questions", quiz_difficulty_label:"Difficulty",
+      quiz_diff_easy:"Easy", quiz_diff_medium:"Medium", quiz_diff_hard:"Hard",
+      simulado_generate_cta:"Generate practice test", prova_generate_cta:"Generate exam",
+      simulado_generating:"Generating the practice test questions...", prova_generating:"Generating the exam questions...",
+      quiz_question_label:"Question", simulado_submit_cta:"Grade practice test", prova_submit_cta:"Submit for grading",
+      quiz_missing_answers:"Answer every question before submitting.", quiz_error:"Something went wrong. Please try again shortly.",
+      quiz_score_label:"Score", quiz_new_cta:"Try another one", prova_answer_ph:"Write your answer here...",
+      prova_grading:"The AI is grading your answers...",
       schedule_day_empty:"No activities that day.",
       chat_title:"AI chat", chat_sub:"Available 24 hours a day, 7 days a week. Ask anything about what you're studying.",
       chat_greeting:"Hi, Maria! I'm your study assistant, available 24/7. Ask me about any material you've uploaded, ask me to re-explain a concept, or just ask a question. What do you want to study today?",
@@ -1418,6 +1502,241 @@
       </div>`).join('')}</div>`;
   }
 
+  // ---------- simulado (objetivo, corrigido na hora) e prova (descritiva, corrigida pela IA) ----------
+  let simuladoState = { quiz: null, selected: [] };
+  let provaState = { quiz: null };
+
+  function renderQuizForm(mode){
+    const body = document.getElementById(mode+'Body');
+    if(isExplainLocked()){
+      body.innerHTML = `
+        <div class="locked-pane">
+          <div class="locked-icon">${lockIcon}</div>
+          <span class="premium-pill">${currentLang==='pt' ? 'recurso premium' : 'premium feature'}</span>
+          <h3>${t(mode+'_locked_title')}</h3>
+          <p>${t(mode+'_locked_desc')}</p>
+          <button class="btn btn-primary" onclick="openUpgrade('plus')">${t('explain_locked_cta')}</button>
+        </div>`;
+      return;
+    }
+    if(!contentData.length){
+      body.innerHTML = `<div class="quiz-empty-materials">${t('quiz_no_materials')}</div>`;
+      return;
+    }
+    const materialOptions = contentData.map(m => `<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('');
+    body.innerHTML = `
+      <div class="schedule-form">
+        <div class="quiz-field">
+          <label>${t('quiz_material_label')}</label>
+          <select class="objective-select" id="${mode}MaterialSelect">${materialOptions}</select>
+        </div>
+        <div class="quiz-field-row">
+          <div class="quiz-field">
+            <label>${t('quiz_count_label')}</label>
+            <select class="objective-select" id="${mode}CountSelect">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="quiz-field">
+            <label>${t('quiz_difficulty_label')}</label>
+            <select class="objective-select" id="${mode}DifficultySelect">
+              <option value="facil">${t('quiz_diff_easy')}</option>
+              <option value="medio" selected>${t('quiz_diff_medium')}</option>
+              <option value="dificil">${t('quiz_diff_hard')}</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-large" onclick="generateQuiz('${mode}')" id="${mode}GenerateBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>${t(mode+'_generate_cta')}</span>
+        </button>
+        <div class="schedule-error" id="${mode}Error"></div>
+      </div>
+      <div id="${mode}Result"></div>`;
+  }
+
+  async function generateQuiz(mode){
+    const materialId = Number(document.getElementById(mode+'MaterialSelect').value);
+    const count = Number(document.getElementById(mode+'CountSelect').value);
+    const difficulty = document.getElementById(mode+'DifficultySelect').value;
+    const btn = document.getElementById(mode+'GenerateBtn');
+    const errEl = document.getElementById(mode+'Error');
+    const resultEl = document.getElementById(mode+'Result');
+    errEl.textContent = '';
+    btn.disabled = true;
+    resultEl.innerHTML = `<div class="explain-loading"><div class="explain-spinner"></div><p>${t(mode+'_generating')}</p></div>`;
+
+    try{
+      const res = await fetch(`/api/${mode}`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ materialId, count, difficulty, lang: currentLang })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        if(data.error === 'plan_locked'){ renderQuizForm(mode); return; }
+        throw new Error(data.error || 'quiz_failed');
+      }
+      if(mode === 'simulado'){
+        simuladoState = { quiz: data.quiz, selected: new Array(data.quiz.questions.length).fill(null) };
+        renderSimuladoQuiz();
+      } else {
+        provaState = { quiz: data.quiz };
+        renderProvaQuiz();
+      }
+    } catch(err){
+      console.error(err);
+      resultEl.innerHTML = '';
+      errEl.textContent = t('quiz_error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderSimuladoQuiz(){
+    const resultEl = document.getElementById('simuladoResult');
+    const quiz = simuladoState.quiz;
+    resultEl.innerHTML = quiz.questions.map((q, i) => `
+      <div class="quiz-question-card">
+        <div class="quiz-question-num">${t('quiz_question_label')} ${i+1}/${quiz.questions.length}</div>
+        <div class="quiz-question-text">${escapeHtml(q.q)}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt, oi) => `
+            <label class="quiz-option ${simuladoState.selected[i]===oi ? 'selected' : ''}" onclick="selectSimuladoAnswer(${i},${oi})">
+              <input type="radio" name="simulado-q${i}" ${simuladoState.selected[i]===oi?'checked':''}>
+              <span>${escapeHtml(opt)}</span>
+            </label>`).join('')}
+        </div>
+      </div>`).join('') + `
+      <button class="btn btn-primary btn-large" onclick="submitSimulado()" id="simuladoSubmitBtn">${t('simulado_submit_cta')}</button>
+      <div class="schedule-error" id="simuladoSubmitError"></div>`;
+  }
+
+  function selectSimuladoAnswer(qIndex, optIndex){
+    simuladoState.selected[qIndex] = optIndex;
+    renderSimuladoQuiz();
+  }
+
+  async function submitSimulado(){
+    if(simuladoState.selected.some(v => v === null)){
+      document.getElementById('simuladoSubmitError').textContent = t('quiz_missing_answers');
+      return;
+    }
+    const btn = document.getElementById('simuladoSubmitBtn');
+    btn.disabled = true;
+    try{
+      const res = await fetch(`/api/simulado/${simuladoState.quiz.id}/submit`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ answers: simuladoState.selected })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'submit_failed');
+      renderSimuladoResults(data.results);
+      fetchStats();
+    } catch(err){
+      console.error(err);
+      document.getElementById('simuladoSubmitError').textContent = t('quiz_error');
+      btn.disabled = false;
+    }
+  }
+
+  function renderSimuladoResults(results){
+    const resultEl = document.getElementById('simuladoResult');
+    const quiz = simuladoState.quiz;
+    resultEl.innerHTML = `
+      <div class="quiz-score-summary">
+        <div class="quiz-score-big">${results.correctCount}/${results.total}</div>
+        <div class="quiz-score-label">${t('quiz_score_label')} · ${Math.round(results.score)}%</div>
+      </div>` +
+      quiz.questions.map((q, i) => {
+        const r = results.perQuestion[i];
+        return `
+        <div class="quiz-question-card">
+          <div class="quiz-question-num">${t('quiz_question_label')} ${i+1}/${quiz.questions.length}</div>
+          <div class="quiz-question-text">${escapeHtml(q.q)}</div>
+          <div class="quiz-options">
+            ${q.options.map((opt, oi) => {
+              let cls = '';
+              if(oi === r.correctIndex) cls = 'correct';
+              else if(oi === r.yourIndex) cls = 'incorrect';
+              return `<div class="quiz-option ${cls}">${escapeHtml(opt)}</div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('') +
+      `<button class="btn btn-outline" onclick="simuladoState={quiz:null,selected:[]};renderQuizForm('simulado')">${t('quiz_new_cta')}</button>`;
+  }
+
+  function renderProvaQuiz(){
+    const resultEl = document.getElementById('provaResult');
+    const quiz = provaState.quiz;
+    resultEl.innerHTML = quiz.questions.map((q, i) => `
+      <div class="quiz-question-card">
+        <div class="quiz-question-num">${t('quiz_question_label')} ${i+1}/${quiz.questions.length}</div>
+        <div class="quiz-question-text">${escapeHtml(q.q)}</div>
+        <textarea class="quiz-answer-textarea" rows="4" id="provaAnswer${i}" placeholder="${t('prova_answer_ph')}"></textarea>
+      </div>`).join('') + `
+      <button class="btn btn-primary btn-large" onclick="submitProva()" id="provaSubmitBtn">${t('prova_submit_cta')}</button>
+      <div class="schedule-error" id="provaSubmitError"></div>`;
+  }
+
+  async function submitProva(){
+    const quiz = provaState.quiz;
+    const answers = quiz.questions.map((_, i) => document.getElementById('provaAnswer'+i).value.trim());
+    if(answers.some(a => !a)){
+      document.getElementById('provaSubmitError').textContent = t('quiz_missing_answers');
+      return;
+    }
+    const btn = document.getElementById('provaSubmitBtn');
+    btn.disabled = true;
+    const resultEl = document.getElementById('provaResult');
+    resultEl.insertAdjacentHTML('beforeend', `<div class="explain-loading" id="provaGrading"><div class="explain-spinner"></div><p>${t('prova_grading')}</p></div>`);
+    try{
+      const res = await fetch(`/api/prova/${quiz.id}/submit`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ answers })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'submit_failed');
+      renderProvaResults(data.results, answers);
+      fetchStats();
+    } catch(err){
+      console.error(err);
+      document.getElementById('provaGrading')?.remove();
+      document.getElementById('provaSubmitError').textContent = t('quiz_error');
+      btn.disabled = false;
+    }
+  }
+
+  function renderProvaResults(results, answers){
+    const resultEl = document.getElementById('provaResult');
+    const quiz = provaState.quiz;
+    resultEl.innerHTML = `
+      <div class="quiz-score-summary">
+        <div class="quiz-score-big">${results.overallScore}/10</div>
+        <div class="quiz-score-label">${t('quiz_score_label')}</div>
+        <p style="color:var(--text-muted);font-size:13px;margin-top:10px;">${escapeHtml(results.overallFeedback || '')}</p>
+      </div>` +
+      quiz.questions.map((q, i) => {
+        const r = results.perQuestion[i] || { score: 0, feedback: '' };
+        return `
+        <div class="quiz-question-card">
+          <div class="quiz-question-num">${t('quiz_question_label')} ${i+1}/${quiz.questions.length}</div>
+          <div class="quiz-question-text">${escapeHtml(q.q)}</div>
+          <div class="quiz-feedback" style="margin-bottom:10px;background:transparent;border-style:dashed;">${escapeHtml(answers[i])}</div>
+          <div class="quiz-feedback">
+            <span class="quiz-feedback-score">${t('quiz_score_label')}: ${r.score}/10</span>
+            ${escapeHtml(r.feedback || '')}
+          </div>
+        </div>`;
+      }).join('') +
+      `<button class="btn btn-outline" onclick="provaState={quiz:null};renderQuizForm('prova')">${t('quiz_new_cta')}</button>`;
+  }
+
   function toggleExport(btn){
     document.querySelectorAll('.export-menu.open').forEach(m=>{ if(m!==btn.nextElementSibling) m.classList.remove('open'); });
     btn.nextElementSibling.classList.toggle('open');
@@ -1440,6 +1759,8 @@
       if(target) target.classList.add('active');
     }
     if(view==='config') renderAdminPanel();
+    if(view==='simulado' && !simuladoState.quiz) renderQuizForm('simulado');
+    if(view==='prova' && !provaState.quiz) renderQuizForm('prova');
   }
 
   function renderAdminPanel(){

@@ -437,6 +437,31 @@ function writeMaterials(list) {
   fs.writeFileSync(MATERIALS_FILE, JSON.stringify(list, null, 2));
 }
 
+// ---------- simulado (objetivo) e prova (descritiva) gerados a partir de um material ----------
+const QUIZZES_FILE = path.join(__dirname, 'quizzes.json');
+
+function readQuizzes() {
+  try {
+    return JSON.parse(fs.readFileSync(QUIZZES_FILE, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+function writeQuizzes(list) {
+  fs.writeFileSync(QUIZZES_FILE, JSON.stringify(list, null, 2));
+}
+
+function isPlanLocked(user) {
+  return !user.isAdmin && user.plan === 'free';
+}
+
+const QUIZ_COUNTS = [10, 20, 30, 40, 50];
+const QUIZ_DIFFICULTIES = ['facil', 'medio', 'dificil'];
+const DIFFICULTY_LABEL = {
+  pt: { facil: 'fácil', medio: 'médio', dificil: 'difícil' },
+  en: { facil: 'easy', medio: 'medium', dificil: 'hard' }
+};
+
 function requireAuth(req, res) {
   const users = readUsers();
   const user = users.find(u => u.id === req.session.userId);
@@ -540,6 +565,220 @@ app.post('/api/materials/:id/explain', async (req, res) => {
     res.json({ explanation: text });
   } catch (err) {
     console.error('material explain error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/simulado', async (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  if (isPlanLocked(user)) return res.status(403).json({ error: 'plan_locked' });
+
+  const { materialId, count, difficulty, lang = 'pt' } = req.body;
+  if (!QUIZ_COUNTS.includes(Number(count)) || !QUIZ_DIFFICULTIES.includes(difficulty)) {
+    return res.status(400).json({ error: 'invalid_params' });
+  }
+  const material = readMaterials().find(m => m.id === Number(materialId) && m.userId === user.id);
+  if (!material) return res.status(404).json({ error: 'material_not_found' });
+
+  const diffLabel = DIFFICULTY_LABEL[lang === 'en' ? 'en' : 'pt'][difficulty];
+  const systemInstruction = lang === 'pt'
+    ? `Você é o Studycast AI. A partir do texto de material de estudo fornecido, gere exatamente ${count} questões de múltipla escolha com nível de dificuldade ${diffLabel}, cada uma com 4 alternativas e apenas 1 correta. Responda APENAS com um JSON válido, sem texto antes ou depois, sem markdown e sem crases, exatamente neste formato: [{"q":"enunciado da questão","options":["alternativa A","alternativa B","alternativa C","alternativa D"],"correct":0}]. O campo "correct" é o índice (0 a 3) da alternativa certa. Varie a posição da alternativa correta entre as questões.`
+    : `You are Studycast AI. From the given study material text, generate exactly ${count} multiple-choice questions at ${diffLabel} difficulty, each with 4 options and only 1 correct answer. Respond ONLY with valid JSON, no text before or after, no markdown, no backticks, in exactly this format: [{"q":"question text","options":["option A","option B","option C","option D"],"correct":0}]. The "correct" field is the index (0 to 3) of the right option. Vary the position of the correct option across questions.`;
+
+  const userPrompt = lang === 'pt'
+    ? `Material: "${material.title}"\n\nTexto do material:\n${(material.sourceText || material.title).slice(0, 6000)}\n\nGere as ${count} questões de múltipla escolha.`
+    : `Material: "${material.title}"\n\nMaterial text:\n${(material.sourceText || material.title).slice(0, 6000)}\n\nGenerate the ${count} multiple-choice questions.`;
+
+  try {
+    const { text } = await withFallback([
+      { name: 'gemini', run: () => callGemini(systemInstruction, [{ role: 'user', parts: [{ text: userPrompt }] }]) },
+      { name: 'groq', run: () => callGroq(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'openrouter', run: () => callOpenRouter(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'cloudflare', run: () => callCloudflare(systemInstruction, [{ role: 'user', content: userPrompt }]) }
+    ], 'simulado');
+    const questions = extractJsonArray(text)
+      .filter(q => q && q.q && Array.isArray(q.options) && q.options.length === 4 && Number.isInteger(q.correct))
+      .map(q => ({ q: q.q, options: q.options, correct: Math.min(3, Math.max(0, q.correct)) }));
+    if (!questions.length) throw new Error('no_valid_questions');
+
+    const quiz = {
+      id: Date.now(),
+      userId: user.id,
+      materialId: material.id,
+      materialTitle: material.title,
+      mode: 'simulado',
+      difficulty,
+      count: questions.length,
+      questions,
+      results: null,
+      status: 'pending',
+      date: new Date().toISOString()
+    };
+    const list = readQuizzes();
+    list.push(quiz);
+    writeQuizzes(list);
+
+    res.json({ quiz: { id: quiz.id, materialTitle: quiz.materialTitle, mode: quiz.mode, difficulty, questions: questions.map(({ q, options }) => ({ q, options })) } });
+  } catch (err) {
+    console.error('simulado error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/simulado/:id/submit', (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+
+  const list = readQuizzes();
+  const quiz = list.find(q => q.id === Number(req.params.id) && q.userId === user.id && q.mode === 'simulado');
+  if (!quiz) return res.status(404).json({ error: 'not_found' });
+
+  if (quiz.status === 'submitted') {
+    return res.json({ results: quiz.results });
+  }
+
+  const { answers } = req.body;
+  if (!Array.isArray(answers) || answers.length !== quiz.questions.length) {
+    return res.status(400).json({ error: 'invalid_answers' });
+  }
+
+  const perQuestion = quiz.questions.map((question, i) => ({
+    correctIndex: question.correct,
+    yourIndex: answers[i],
+    isCorrect: Number(answers[i]) === question.correct
+  }));
+  const correctCount = perQuestion.filter(p => p.isCorrect).length;
+  const results = {
+    total: quiz.questions.length,
+    correctCount,
+    score: (correctCount / quiz.questions.length) * 100,
+    perQuestion
+  };
+
+  quiz.answers = answers;
+  quiz.results = results;
+  quiz.status = 'submitted';
+  writeQuizzes(list);
+  addStudyMinutes(user.id, Math.round(quiz.questions.length * 0.5));
+
+  res.json({ results });
+});
+
+app.post('/api/prova', async (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  if (isPlanLocked(user)) return res.status(403).json({ error: 'plan_locked' });
+
+  const { materialId, count, difficulty, lang = 'pt' } = req.body;
+  if (!QUIZ_COUNTS.includes(Number(count)) || !QUIZ_DIFFICULTIES.includes(difficulty)) {
+    return res.status(400).json({ error: 'invalid_params' });
+  }
+  const material = readMaterials().find(m => m.id === Number(materialId) && m.userId === user.id);
+  if (!material) return res.status(404).json({ error: 'material_not_found' });
+
+  const diffLabel = DIFFICULTY_LABEL[lang === 'en' ? 'en' : 'pt'][difficulty];
+  const systemInstruction = lang === 'pt'
+    ? `Você é o Studycast AI. A partir do texto de material de estudo fornecido, gere exatamente ${count} questões descritivas (dissertativas, sem alternativas) com nível de dificuldade ${diffLabel}, que exijam uma resposta escrita explicando ou desenvolvendo um conceito do material. Responda APENAS com um JSON válido, sem texto antes ou depois, sem markdown e sem crases, exatamente neste formato: [{"q":"enunciado da questão descritiva"}].`
+    : `You are Studycast AI. From the given study material text, generate exactly ${count} open-ended (essay-style) questions at ${diffLabel} difficulty, requiring a written answer explaining or developing a concept from the material. Respond ONLY with valid JSON, no text before or after, no markdown, no backticks, in exactly this format: [{"q":"open-ended question text"}].`;
+
+  const userPrompt = lang === 'pt'
+    ? `Material: "${material.title}"\n\nTexto do material:\n${(material.sourceText || material.title).slice(0, 6000)}\n\nGere as ${count} questões descritivas.`
+    : `Material: "${material.title}"\n\nMaterial text:\n${(material.sourceText || material.title).slice(0, 6000)}\n\nGenerate the ${count} open-ended questions.`;
+
+  try {
+    const { text } = await withFallback([
+      { name: 'gemini', run: () => callGemini(systemInstruction, [{ role: 'user', parts: [{ text: userPrompt }] }]) },
+      { name: 'groq', run: () => callGroq(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'openrouter', run: () => callOpenRouter(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'cloudflare', run: () => callCloudflare(systemInstruction, [{ role: 'user', content: userPrompt }]) }
+    ], 'prova');
+    const questions = extractJsonArray(text)
+      .filter(q => q && q.q)
+      .map(q => ({ q: q.q }));
+    if (!questions.length) throw new Error('no_valid_questions');
+
+    const quiz = {
+      id: Date.now(),
+      userId: user.id,
+      materialId: material.id,
+      materialTitle: material.title,
+      mode: 'prova',
+      difficulty,
+      count: questions.length,
+      questions,
+      results: null,
+      status: 'pending',
+      date: new Date().toISOString()
+    };
+    const list = readQuizzes();
+    list.push(quiz);
+    writeQuizzes(list);
+
+    res.json({ quiz: { id: quiz.id, materialTitle: quiz.materialTitle, mode: quiz.mode, difficulty, questions } });
+  } catch (err) {
+    console.error('prova error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/prova/:id/submit', async (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+
+  const list = readQuizzes();
+  const quiz = list.find(q => q.id === Number(req.params.id) && q.userId === user.id && q.mode === 'prova');
+  if (!quiz) return res.status(404).json({ error: 'not_found' });
+
+  if (quiz.status === 'submitted') {
+    return res.json({ results: quiz.results });
+  }
+
+  const { answers, lang = 'pt' } = req.body;
+  if (!Array.isArray(answers) || answers.length !== quiz.questions.length) {
+    return res.status(400).json({ error: 'invalid_answers' });
+  }
+
+  const material = readMaterials().find(m => m.id === quiz.materialId);
+  const qaBlock = quiz.questions.map((q, i) => (lang === 'pt'
+    ? `Questão ${i + 1}: ${q.q}\nResposta do aluno: ${answers[i]}`
+    : `Question ${i + 1}: ${q.q}\nStudent's answer: ${answers[i]}`)).join('\n\n');
+
+  const systemInstruction = lang === 'pt'
+    ? 'Você é o Studycast AI, corrigindo uma prova descritiva. Para cada questão, avalie a resposta do aluno com base no material de referência e dê uma nota de 0 a 10 e um feedback curto e construtivo (o que acertou, o que faltou ou errou). Também dê uma nota geral de 0 a 10 (pode ter casas decimais) e um feedback geral breve. Responda APENAS com um JSON válido, sem texto antes ou depois, sem markdown e sem crases, exatamente neste formato: {"perQuestion":[{"score":7,"feedback":"comentário curto"}],"overallScore":7.5,"overallFeedback":"comentário geral curto"}. A lista perQuestion deve ter exatamente uma entrada por questão, na mesma ordem.'
+    : 'You are Studycast AI, grading an open-ended exam. For each question, evaluate the student\'s answer against the reference material and give a score from 0 to 10 and short, constructive feedback (what was right, what was missing or wrong). Also give an overall score from 0 to 10 (decimals allowed) and a brief overall feedback. Respond ONLY with valid JSON, no text before or after, no markdown, no backticks, in exactly this format: {"perQuestion":[{"score":7,"feedback":"short comment"}],"overallScore":7.5,"overallFeedback":"short overall comment"}. The perQuestion list must have exactly one entry per question, in the same order.';
+
+  const userPrompt = lang === 'pt'
+    ? `Material de referência: "${quiz.materialTitle}"\n${material ? `Texto do material:\n${(material.sourceText || '').slice(0, 4000)}\n\n` : ''}${qaBlock}\n\nCorrija cada resposta e dê a nota geral.`
+    : `Reference material: "${quiz.materialTitle}"\n${material ? `Material text:\n${(material.sourceText || '').slice(0, 4000)}\n\n` : ''}${qaBlock}\n\nGrade each answer and give the overall score.`;
+
+  try {
+    const { text } = await withFallback([
+      { name: 'gemini', run: () => callGemini(systemInstruction, [{ role: 'user', parts: [{ text: userPrompt }] }]) },
+      { name: 'groq', run: () => callGroq(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'openrouter', run: () => callOpenRouter(systemInstruction, [{ role: 'user', content: userPrompt }]) },
+      { name: 'cloudflare', run: () => callCloudflare(systemInstruction, [{ role: 'user', content: userPrompt }]) }
+    ], 'correção de prova');
+    const graded = extractJsonObject(text);
+    const perQuestion = quiz.questions.map((_, i) => {
+      const g = (graded.perQuestion && graded.perQuestion[i]) || {};
+      return { score: Number.isFinite(g.score) ? g.score : 0, feedback: g.feedback || '' };
+    });
+    const results = {
+      perQuestion,
+      overallScore: Number.isFinite(graded.overallScore) ? graded.overallScore : 0,
+      overallFeedback: graded.overallFeedback || ''
+    };
+
+    quiz.answers = answers;
+    quiz.results = results;
+    quiz.status = 'submitted';
+    writeQuizzes(list);
+    addStudyMinutes(user.id, Math.round(quiz.questions.length * 1.5));
+
+    res.json({ results });
+  } catch (err) {
+    console.error('prova submit error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
