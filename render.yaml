@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: studycast-ai
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: ADMIN_CODE
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: TTS_GLOBAL_MONTHLY_CHAR_CAP
+        value: "3000000"
+      - key: TTS_FREE_PLAN_CHAR_LIMIT
+        value: "13500"
+      - key: TTS_PLUS_PLAN_CHAR_LIMIT
+        value: "270000"
+      - key: TTS_PREMIUM_PLAN_CHAR_LIMIT
+        value: "540000"
+      - key: TTS_RATE_LIMIT_PER_HOUR
+        value: "5"
+      - key: TTS_MAX_DOCUMENT_CHARS
+        value: "200000"
+      - key: FOUNDER_ALERT_WEBHOOK
+        sync: false
